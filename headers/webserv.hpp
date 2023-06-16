@@ -10,7 +10,14 @@
 # include <iostream>
 # include <cctype>
 # include <ctime>
+# include <vector>
+# include <cstring>
+# include <string>
+# include <cstdio>
+# include <fstream>
 # define PORT "8080"
 # define BACKLOG 10
+
+bool	send_request(char	*buff);
 
 #endif
