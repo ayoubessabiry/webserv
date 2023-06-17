@@ -19,8 +19,7 @@
 enum parsing_state
 {
 	SERVER = 1,
-	LOCATION,
-	BRACKET
+	LOCATION
 };
 
 struct location_block
@@ -31,9 +30,9 @@ struct location_block
 	std::string					cgi_exec;
 	std::string					cgi_path;
 	std::string					_return;
+	std::string					client_max_body_size;
 	std::vector<std::string>	indexes;
 	std::vector<std::string>	methods;
-	std::vector<std::string>	client_max_body_size;
 };
 
 struct server_block
@@ -58,6 +57,8 @@ struct webserver
 	void						print_config_file();	// For debugging
 };
 
+bool						check_if_port_valid(std::string);
+bool						check_if_host_valid(std::string);
 int							return_state(std::string);
 int							get_port(std::vector<std::string>);
 size_t						get_client_max_body_size(std::string);
