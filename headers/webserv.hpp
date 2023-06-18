@@ -8,21 +8,19 @@
 # include <arpa/inet.h>
 # include <netdb.h>
 # include <unistd.h>
-// # include <string.h>
-// # include <iostream>
-// # include <cctype>
-// # include <ctime>
-// # include <vector>
-// # include <cstring>
-// # include <string>
-// # include <cstdio>
-// # include <fstream>
-// # include <map>
-#include "../parse_request.hpp"
+# include <string.h>
+# include <iostream>
+# include <cctype>
+# include <ctime>
+# include <vector>
+# include <cstring>
+# include <string>
+# include <cstdio>
+# include <fstream>
+# include <map>
+#include "../request/parse_request.hpp"
 
-
-# define PORT "8080"
-# define BACKLOG 10
+# define BACKLOG  32767
 
 bool	send_request(char	*buff);
 
