@@ -76,6 +76,7 @@ void webserver::parse_server_block(std::string config_file_data)
 			else
 			{
 				std::cout << "ERROR\n";
+				exit(1);
 				return ;
 			}
 		}
@@ -86,7 +87,6 @@ void webserver::parse_server_block(std::string config_file_data)
 			{
 				block_state = 0;
 				server_blocks.push_back(server);
-				std::cout << "Server end\n";
 			}
 			if (config_tokens[i] == "listen")
 			{
@@ -156,11 +156,14 @@ void webserver::parse_server_block(std::string config_file_data)
 				else
 				{
 					std::cout << "ERROR\n";
+					exit(1);
 					return ;
 				}
 				if (config_tokens[i] == "{")
 				{
 					std::cout << "ERROR\n";
+					server.locations.push_back(location);
+					exit(1);
 					return ;
 				}
 				i++;
@@ -179,6 +182,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				if (config_tokens[i] != ";")
 				{
 					std::cout << "ERROR\n";
+					exit(1);
 					return ;
 				}
 			}
@@ -190,9 +194,9 @@ void webserver::parse_server_block(std::string config_file_data)
 				if (config_tokens[i] != ";")
 				{
 					std::cout << "ERROR\n";
+					exit(1);
 					return ;
 				}
-				std::cout << config_tokens[i] << "\n";
 				location.client_max_body_size = config_tokens[i];
 			}
 			if (config_tokens[i] == "}")

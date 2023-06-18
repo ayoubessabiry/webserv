@@ -59,7 +59,9 @@ void	Server::get_rqst(int ready_client){
 	while (ready_client != clients[i].socket)
 		++i;
 	clients[i].recv_byte += recv(ready_client, buff, MAX_REQUEST_SIZE, 0);
+
 	if(send_request(buff)){
 		std::cout << "req done!" << std::endl;
 	}
 }
+

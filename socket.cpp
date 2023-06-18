@@ -72,7 +72,7 @@ int main(){
 	std::vector<Client> clients;
 	int max_socket, socket, new_c;
 
-	socket = create_socket(0, "8080");
+	socket = create_socket(0, PORT);
 	fd_set main;
 	FD_ZERO(&main);
 	FD_SET(socket, &main);
