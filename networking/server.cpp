@@ -103,7 +103,6 @@ void	Server::get_rqst(int ready_client){
 
 	if(send_request(buff)){
 		// move ready_client to send();
-		std::cout << "am here" << std::endl;
 		FD_SET(ready_client, &masterWrite);
 		(ready_client > max_Wsocket) ? max_Wsocket = ready_client : max_Wsocket;
 	}

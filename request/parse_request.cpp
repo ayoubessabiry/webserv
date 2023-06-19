@@ -18,19 +18,21 @@ void request::print_request()
 	std::map<std::string, std::string>::iterator	it;
 
 	std::cout << "\e[1;33m----------Request Line----------\n";
-	std::cout << "\e[1;33m Method: \e[0;33m" << first_line.method << "\n";
-	std::cout << "\e[1;33m Request Uri: \e[0;33m" << first_line.request_uri << "\n";
+	std::cout << "\e[1;33m Method: \e[0;33m" << method << "\n";
+	std::cout << "\e[1;33m Request Uri: \e[0;33m" << uri << "\n";
 	std::cout << "\n\n";
 
-	for	(it = headers.request_headers.begin(); it != headers.request_headers.end() ; ++it)
+	for	(it = headers.begin(); it != headers.end() ; ++it)
 	{
 		std::cout << "\e[1;32m----------Header value----------\e[0;32m\n";
-		std::cout << "\e[1;32mHeader: \e[0;32m" << it->first << "\n";
-		std::cout << "\e[1;32mValue: \e[0;32m" << it->second << "\n";
+		std::cout << "\e[1;32mHeader: \e[0;32m|" << it->first << "|\n";
+		std::cout << "\e[1;32mValue: \e[0;32m|" << it->second << "|\n";
 	}
 
 	if (!body.empty())
 	{
+		std::cout << "\e[1;35m---------Body------------\e[0;35m\n";
+		std::cout << "\e[1;35m" << body.size();
 	}
 }
 
@@ -38,48 +40,39 @@ bool request::parse_request_data(std::string &req)
 {
 	bool	request_ended = false;
 
-	// Retrieve method and uri
-	std::size_t find = req.find("\r\n");
-	std::string line_one = req.substr(0, find);
+	std::size_t find = req.find("\r\n\r\n");
+	std::size_t find_sec = req.find("\r\n\r\n", find + 1);
+	std::string header_half = req.substr(0, find);
 
-	first_line.method = line_one.substr(0, req.find(" "));
-	find = req.find(" ");
-	std::size_t find_sec = req.find(" ", find + 1);
-	first_line.request_uri = line_one.substr(find + 1, find_sec - find - 1);
+	body = req.substr(find, req.size() - 1);
+
+	// Retrieve method and uri
+	std::stringstream header_data(header_half);
+	std::string	line;
+	std::getline(header_data, line, '\r');
+
+	std::stringstream first_line_data(line);
+
+	std::getline(first_line_data, method, ' ');
+	std::getline(first_line_data, uri, ' ');
 
 	// Retrieve Headers with there values
-	find = req.find("\r\n") + 2;
-	find_sec = req.find("\r\n", find + 1, 2) - find;
-	std::string line = req.substr(find, find_sec);
-	line = req.substr(find, find_sec);
-	std::string header;
-	std::string header_value;
-	if (line.size() >= 1)
+	while (std::getline(header_data, line))
 	{
-		header = line.substr(0, line.find(": "));
-		header_value = line.substr(line.find(": ") + 2, line.size() - 1);
-		headers.request_headers.insert(std::pair<std::string, std::string>
-		(header, header_value));
-	}
-	while (1)
-	{
-		find = find_sec + find + 2;
-		if (find == 1)
-			break ;
-		find_sec = req.find("\r\n", find + 1, 2) - find;
-		line = req.substr(find, find_sec);
-		if (line == "")
-			request_ended = true;
-		if (line.size() >= 1)
-		{
-			header = line.substr(0, line.find(": "));
-			header_value = line.substr(line.find(": ") + 2, line.size() - 1);
-			headers.request_headers.insert(std::pair<std::string, std::string>
-			(header, header_value));
-		}
+		std::stringstream	field_data(line);
+		std::string			field;
+		std::string			value;
+		std::getline(field_data, field, ':');
+		std::getline(field_data, value, '\r');
+		if (field != "")
+			headers.insert(std::make_pair<std::string, std::string>(field, value));
 	}
 
-	// Retrieve the body if it's a POST method
+	// Chunked transfer encoding
+	// if ()
+	{
+		
+	}
 
 	return request_ended;
 }
@@ -91,15 +84,12 @@ bool	send_request(char *buff)
 	std::string buffer = std::string(buff);
 
 	post_file.open("yekh", std::ios::in | std::ios::out);
-	std::cout << "Request" << std::endl;
 	std::cout << buff << std::endl;
-	post_file << buff;
-	post_file.flush();
+	// post_file << buff;
 
-	// request _request;
+	request _request;
+	bool ended = _request.parse_request_data(buffer);
 	// _request.print_request();
-
-	// bool ended = _request.parse_request_data(buffer);
 
 	return true;
 }
@@ -113,7 +103,7 @@ bool	send_request(char *buff)
 // 	"Content-Type: application/json\r\n"
 // 	"Content-Length: 85\r\n"
 // 	"Host: reqbin.com\r\n"
-// 	"\r\n"
+// 	"\r\n\r\n"
 // 	"{\r\n"
 // 	"Id: 12345,\r\n"
 // 	"Customer: John Smit,\r\n"
@@ -124,10 +114,6 @@ bool	send_request(char *buff)
 
 // 	bool	ended = false;
 
-// 	std::cout << std::boolalpha << ended;
-
 // 	ended = send_request((char*)POST_HTTP.c_str());
 
-// 	if (!ended)
-// 		std::cout << "hehe";
 // }
