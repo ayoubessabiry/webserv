@@ -102,6 +102,7 @@ void	Server::get_rqst(int ready_client){
 	clients[i].recv_byte += recv(ready_client, buff, MAX_REQUEST_SIZE, 0);
 
 	if(send_request(buff)){
+		// move ready_client to send();
 		FD_SET(ready_client, &masterWrite);
 		(ready_client > max_Wsocket) ? max_Wsocket = ready_client : max_Wsocket;
 	}

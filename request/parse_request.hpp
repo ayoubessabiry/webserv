@@ -1,6 +1,7 @@
 
 # include <string.h>
 # include <iostream>
+# include <sstream>
 # include <cctype>
 # include <ctime>
 # include <vector>
@@ -9,12 +10,6 @@
 # include <cstdio>
 # include <fstream>
 # include <map>
-
-struct request_line
-{
-	std::string	method;
-	std::string	request_uri;
-};
 
 struct header_fields
 {
@@ -26,8 +21,10 @@ struct header_fields
 
 struct request
 {
-	request_line	first_line;
-	header_fields	headers;
+	std::string		method;
+	std::string		uri;
+	// header_fields	headers;
+	std::map<std::string, std::string>		headers;
 	std::string		body;
 	std::string		status;
 
