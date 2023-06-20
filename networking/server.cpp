@@ -102,17 +102,13 @@ void	Server::get_rqst(int ready_client){
 	clients[i].recv_byte += recv(ready_client, buff, MAX_REQUEST_SIZE, 0);
 
 	if(send_request(buff)){
-		// move ready_client to send();
-		std::cout << "am here" << std::endl;
 		FD_SET(ready_client, &masterWrite);
 		(ready_client > max_Wsocket) ? max_Wsocket = ready_client : max_Wsocket;
 	}
 }
 
 void	Server::send_rqst(int ready_client){
-
 	char buff[] = "HTTP/1.1 HTTP/1.1 200 OK\nDate: Sun, 18 Oct 2012 10:36:20 GMT\nServer: Apache/2.2.14 (Win32)\nContent-Length: 88\nConnection: Closed\nContent-Type: text/html;\ncharset=iso-8859-1\n\r\n\r<html><body><h1>Hello, World!</h1></body></html>";
-
 	send(ready_client, buff, sizeof buff, 0);
-	exit(1);
+	// exit(1);
 }
