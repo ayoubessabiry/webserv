@@ -15,6 +15,7 @@
 # include <vector>
 # include <cstring>
 # include <string>
+# include <cstdlib>
 # include <cstdio>
 # include <fstream>
 # include <map>

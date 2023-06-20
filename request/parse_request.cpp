@@ -44,7 +44,8 @@ bool request::parse_request_data(std::string &req)
 	std::size_t find_sec = req.find("\r\n\r\n", find + 1);
 	std::string header_half = req.substr(0, find);
 
-	body = req.substr(find, req.size() - 1);
+	if (find >= req.size())
+		body = req.substr(find, req.size() - 1);
 
 	// Retrieve method and uri
 	std::stringstream header_data(header_half);
@@ -60,18 +61,23 @@ bool request::parse_request_data(std::string &req)
 	while (std::getline(header_data, line))
 	{
 		std::stringstream	field_data(line);
-		std::string			field;
 		std::string			value;
+		std::cout << "|" << line << "|\n";
+		std::string field;
 		std::getline(field_data, field, ':');
+		std::stringstream	field_space(field);
+		std::getline(field_space, field, ' ');
+		std::getline(field_data, value, ' ');
 		std::getline(field_data, value, '\r');
 		if (field != "")
-			headers.insert(std::make_pair<std::string, std::string>(field, value));
+		headers.insert(std::make_pair<std::string, std::string>(std::string(field), value));
 	}
 
 	// Chunked transfer encoding
-	// if ()
+	if (body.empty() && method == "GET")
 	{
-		
+		request_ended = true;
+		std::cout << "Ended\n";
 	}
 
 	return request_ended;
@@ -89,7 +95,7 @@ bool	send_request(char *buff)
 
 	request _request;
 	bool ended = _request.parse_request_data(buffer);
-	// _request.print_request();
+	_request.print_request();
 
 	return true;
 }
