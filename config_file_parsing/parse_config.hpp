@@ -24,13 +24,13 @@ enum parsing_state
 
 struct location_block
 {
-	std::string					match;
+	std::string					prefix;
 	std::string					root;
 	std::string					upload;
 	std::string					cgi_exec;
 	std::string					cgi_path;
-	std::string					_return;
 	std::string					client_max_body_size;
+	std::vector<std::string>	redirect;
 	std::vector<std::string>	indexes;
 	std::vector<std::string>	methods;
 };
@@ -40,6 +40,7 @@ struct server_block
 	std::string					host;
 	std::string					server_name;
 	std::string					root;
+	std::string					auto_index;
 	std::string					access_log;
 	std::vector<std::string>	ports;
 	std::vector<std::string>	indexes;
@@ -59,6 +60,8 @@ struct webserver
 
 bool						check_if_port_valid(std::string);
 bool						check_if_host_valid(std::string);
+bool						check_if_method_valid(std::string);
+bool						check_if_directive_valid(std::string);
 int							return_state(std::string);
 int							get_port(std::vector<std::string>);
 size_t						get_client_max_body_size(std::string);

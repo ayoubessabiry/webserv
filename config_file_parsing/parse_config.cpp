@@ -1,5 +1,19 @@
 #include "parse_config.hpp"
 
+bool	check_if_directive_valid(std::string directive)
+{
+	return  directive == "listen" ||
+			directive == "host" ||
+			directive == "server_name" ||
+			directive == "index" || 
+			directive == "auto_index" ||
+			directive == "root" || 
+			directive == "client_max_body_size" ||
+			directive == "return" ||
+			directive == "cgi_exec" ||
+			directive == "cgi_path"; 
+}
+
 bool	check_if_port_valid(std::string port)
 {
 	for	(size_t i = 0 ; i < port.size(); i++)
@@ -8,6 +22,33 @@ bool	check_if_port_valid(std::string port)
 			return false ;
 	}
 	return true;
+}
+
+bool	check_if_host_valid(std::string ip)
+{
+	std::stringstream	_ip(ip);
+	std::string			ip_block;
+
+	size_t	count = 0;
+
+	while (std::getline(_ip, ip_block, '.'))
+	{
+		if (!check_if_port_valid(ip_block))
+			return false;
+		count++;
+	}
+
+	if (count > 4)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool	check_if_method_valid(std::string method)
+{
+	return (method == "GET" || method == "POST" || method == "DELETE");
 }
 
 int	return_state(std::string token)
@@ -30,6 +71,10 @@ void webserver::parse_server_block(std::string config_file_data)
 {
 	size_t	block_state = 0;
 	size_t	bracket_state = 0;
+	size_t	port_directive_numbers = 0;
+	size_t	host_directive_numbers = 0;
+	size_t	location_block_numbers = 0;
+
 	server_block	server;
 	location_block	location;
 
@@ -62,12 +107,14 @@ void webserver::parse_server_block(std::string config_file_data)
 	{
 		if (block_state == 0)
 		{
-			server.ports.clear();
 			server.host.clear();
+			server.root.clear();
 			server.server_name.clear();
+			server.auto_index.clear();
+			server.ports.clear();
 			server.methods.clear();
 			server.errors.clear();
-			server.root.clear();
+			server.locations.clear();
 			if (config_tokens[i] == "server" && config_tokens[i + 1] == "{")
 			{
 				block_state = SERVER;
@@ -76,33 +123,54 @@ void webserver::parse_server_block(std::string config_file_data)
 			else
 			{
 				std::cout << "ERROR\n";
-				exit(1);
 				return ;
 			}
 		}
-		// std::cout << block_state << "\n";
 		if (block_state == SERVER)
 		{
 			if (config_tokens[i] == "}")
 			{
 				block_state = 0;
+				if (port_directive_numbers == 0 || host_directive_numbers == 0 || location_block_numbers == 0)
+				{
+					std::cout << "ERROR" << std::endl;
+					server_blocks.clear();
+					return ;
+				}
+				port_directive_numbers = 0;
+				host_directive_numbers = 0;
+				location_block_numbers = 0;
 				server_blocks.push_back(server);
 			}
+			// Necessary directives listen and host
 			if (config_tokens[i] == "listen")
 			{
 				i++;
-				while (config_tokens[i] != ";")
+				port_directive_numbers++;
+				while (config_tokens[i] != ";" && check_if_port_valid(config_tokens[i]))
 				{
 					server.ports.push_back(config_tokens[i]);
 					i++;
 				}
+				if (!check_if_port_valid(config_tokens[i]) && config_tokens[i] != ";")
+				{
+					std::cout << "ERROR\n";
+					return ;
+				}
+				std::cout << config_tokens[i] << "\n";				
 			}
 			if (config_tokens[i] == "host")
 			{
 				i++;
+				host_directive_numbers++;
 				std::string	host = "";
-				while (config_tokens[i] != ";")
-					host += config_tokens[i++];
+				host += config_tokens[i++];
+				if (config_tokens[i] != ";" || 
+					!check_if_host_valid(host))
+				{
+					std::cout << "ERROR\n";
+					return ;
+				}
 				server.host = host;
 			}
 			if (config_tokens[i] == "server_name")
@@ -111,6 +179,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				std::string	server_name = "";
 				while (config_tokens[i] != ";")
 					server_name += config_tokens[i++];
+				
 				server.server_name = server_name;
 			}
 			if (config_tokens[i] == "method")
@@ -118,17 +187,15 @@ void webserver::parse_server_block(std::string config_file_data)
 				i++;
 				while (config_tokens[i] != ";")
 				{
-					std::string	method = "";
-					for (size_t j = i; config_tokens[j] != "," &&
-									   config_tokens[j] != ";" ; j++)
+					if (!check_if_method_valid(config_tokens[i]))
 					{
-						method += config_tokens[j];
-						i = j;
+						std::cout << "ERROR" << std::endl;
+						return ;
 					}
-					if (method != "")
-						server.methods.push_back(method);
+					server.methods.push_back(config_tokens[i]);
 					i++;
 				}
+				
 			}
 			if (config_tokens[i] == "error")
 			{
@@ -142,30 +209,40 @@ void webserver::parse_server_block(std::string config_file_data)
 			{
 				i++;
 				std::string	root = "";
-				while (config_tokens[i] != ";")
+				root += config_tokens[i++];
+				if (config_tokens[i] != ";")
 				{
-					root += config_tokens[i];
-					i++;
+					std::cout << "ERROR" << std::endl;
+					return ;
 				}
 				server.root = root;
 			}
+			if (config_tokens[i] == "auto_index")
+			{
+				i++;
+				std::string	auto_index = "";
+				auto_index += config_tokens[i++];
+				if (config_tokens[i] != ";")
+				{
+					std::cout << "ERROR" << std::endl;
+					return ;
+				}
+				server.auto_index = auto_index;
+			}
+			// Necessary block location
 			if (config_tokens[i] == "location")
 			{
-				if (config_tokens[i + 1] == "{")
+				if (config_tokens[i + 2] == "{")
+				{
 					block_state = LOCATION;
+					location_block_numbers++;
+				}
 				else
 				{
 					std::cout << "ERROR\n";
-					exit(1);
 					return ;
 				}
-				if (config_tokens[i] == "{")
-				{
-					std::cout << "ERROR\n";
-					server.locations.push_back(location);
-					exit(1);
-					return ;
-				}
+				location.prefix = config_tokens[i + 1];
 				i++;
 			}
 		}
@@ -178,30 +255,53 @@ void webserver::parse_server_block(std::string config_file_data)
 				{
 					location.indexes.push_back(config_tokens[i]);
 					i++;
-				}
-				if (config_tokens[i] != ";")
-				{
-					std::cout << "ERROR\n";
-					exit(1);
-					return ;
-				}
+				}	
 			}
 			if (config_tokens[i] == "client_max_body_size")
 			{
 				i++;
-				while (config_tokens[i] != ";")
-					i++;
+				location.client_max_body_size = config_tokens[i++];
 				if (config_tokens[i] != ";")
 				{
-					std::cout << "ERROR\n";
-					exit(1);
+					std::cout << "ERROR" << std::endl;
 					return ;
 				}
-				location.client_max_body_size = config_tokens[i];
+			}
+			if (config_tokens[i] == "cgi_exec")
+			{
+				i++;
+				location.cgi_exec = config_tokens[i++];
+				if (config_tokens[i] != ";")
+				{
+					std::cout << "ERROR" << std::endl;
+					return ;
+				}
+			}
+			if (config_tokens[i] == "cgi_path")
+			{
+				i++;
+				location.cgi_path = config_tokens[i++];
+				if (config_tokens[i] != ";")
+				{
+					std::cout << "ERROR" << std::endl;
+					return ;
+				}
+			}
+			if (config_tokens[i] == "return")
+			{
+				i++;
+				location.redirect.push_back(config_tokens[i++]);
+				location.redirect.push_back(config_tokens[i++]);
+				if (config_tokens[i] != ";")
+				{
+					std::cout << "ERROR" << std::endl;
+					return ;
+				}
 			}
 			if (config_tokens[i] == "}")
 			{
 				block_state = SERVER;
+				server.locations.push_back(location);
 			}
 		}
 	}
@@ -212,6 +312,14 @@ void	webserver::print_config_file()
 	for (size_t i = 0; i < server_blocks.size(); i++)
 	{
 		std::cout << "---------Server " << i << "---------\n";
+		if (server_blocks[i].host != "")
+			std::cout << "\t Host: " << server_blocks[i].host << "\n";
+		if (!server_blocks[i].server_name.empty())
+			std::cout << "\t Server name: " << server_blocks[i].server_name << "\n";
+		if (!server_blocks[i].auto_index.empty())
+			std::cout << "\t Auto-index: " << server_blocks[i].auto_index << "\n";
+		if (!server_blocks[i].root.empty())
+			std::cout << "\tRoot: " << server_blocks[i].root << "\n";
 		if (!server_blocks[i].ports.empty())
 		{
 			std::cout << "\t----Ports-----\n"; 
@@ -220,10 +328,6 @@ void	webserver::print_config_file()
 				std::cout << "\t\t Port: " << j << " " << server_blocks[i].ports[j] << "\n";
 			}
 		}
-		if (server_blocks[i].host != "")
-			std::cout << "\t Host: " << server_blocks[i].host << "\n";
-		if (!server_blocks[i].server_name.empty())
-			std::cout << "\t Server name: " << server_blocks[i].server_name << "\n";
 		if (!server_blocks[i].methods.empty())
 		{
 			std::cout << "\t----Allowed Methods----\n";
@@ -240,20 +344,22 @@ void	webserver::print_config_file()
 				std::cout << "\t\t|" << server_blocks[i].errors[j] << "|\n";
 			}
 		}
-		if (!server_blocks[i].root.empty())
-		{
-			std::cout << "\tRoot: " << server_blocks[i].root << "\n";
-		}
 		if (!server_blocks[i].locations.empty())
 		{
 			std::cout << "\t-----Locations------\n";
 			for (size_t j = 0; j < server_blocks[i].locations.size(); j++)
 			{
+				if (!server_blocks[i].locations[j].prefix.empty())
+					std::cout << "\tPrefix: " << server_blocks[i].locations[j].prefix << std::endl;
+				if (!server_blocks[i].locations[j].cgi_exec.empty())
+					std::cout << "\tCGI EXEC: " << server_blocks[i].locations[j].cgi_exec << std::endl;
+				if (!server_blocks[i].locations[j].cgi_path.empty())
+					std::cout << "\tCGI PATH: " << server_blocks[i].locations[j].cgi_path << std::endl;	
 				if (!server_blocks[i].locations[j].indexes.empty())
 				{
+					std::cout << "\t\t-----Indexes----	\n";
 					for (size_t k = 0; k < server_blocks[i].locations[j].indexes.size(); k++)
 					{
-						std::cout << "\t--------Indexes-------\n";
 						std::cout << "\t\t" << server_blocks[i].locations[j].indexes[k] << "\n";
 					}
 				}
@@ -279,4 +385,5 @@ int main(int ac, char **av)
 
 	web_s.parse_server_block(file_data_string);
 	web_s.print_config_file();
+
 }
