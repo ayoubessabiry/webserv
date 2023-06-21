@@ -36,6 +36,26 @@ void request::print_request()
 	}
 }
 
+size_t	convert_hex_to_decimal(std::string hex_number)
+{
+	int					num;
+	std::stringstream	ss;
+
+	ss << std::hex << hex_number;
+	ss >> num;
+
+	return num;
+}
+
+bool body_chunked_encoding(std::string body)
+{
+	std::ofstream		chunk_file;
+	std::stringstream	chunk_stream(body);
+	std::string			chunk_size;
+
+	return false;
+}
+
 bool request::parse_request_data(std::string &req)
 {
 	bool	request_ended = false;
@@ -62,22 +82,32 @@ bool request::parse_request_data(std::string &req)
 	{
 		std::stringstream	field_data(line);
 		std::string			value;
-		std::cout << "|" << line << "|\n";
-		std::string field;
+		std::string 		field;
 		std::getline(field_data, field, ':');
 		std::stringstream	field_space(field);
 		std::getline(field_space, field, ' ');
 		std::getline(field_data, value, ' ');
 		std::getline(field_data, value, '\r');
 		if (field != "")
-		headers.insert(std::make_pair<std::string, std::string>(std::string(field), value));
+			headers.insert(std::make_pair<std::string, std::string>(std::string(field), value));
 	}
 
-	// Chunked transfer encoding
 	if (body.empty() && method == "GET")
 	{
 		request_ended = true;
 		std::cout << "Ended\n";
+	}
+	if (method == "POST")
+	{
+		if (headers.count("Content-Length") >= 1)
+		{
+			int	content_length;
+			std::istringstream(headers["Content-Length"]) >> content_length;
+			request_ended = (body.size() == content_length);
+		}
+		// Chunked transfer encoding : not done yet
+		if (headers["Transfer-Encoding"] == "chunked")
+			request_ended = body_chunked_encoding(body);
 	}
 
 	return request_ended;
@@ -86,6 +116,7 @@ bool request::parse_request_data(std::string &req)
 // Check if request is done
 bool	send_request(char *buff)
 {
+	std::string		request_buffer 
 	std::fstream 	post_file;
 	std::string buffer = std::string(buff);
 
@@ -100,26 +131,22 @@ bool	send_request(char *buff)
 	return true;
 }
 
-// int main()
-// {
-// 	std::string POST_HTTP  = 
-// 	"POST /echo/post/json HTTP/1.1\r\n"
-// 	"Authorization: Bearer mt0dgHmLJMVQhvjpNXDyA83vA_Pxh33Y\r\n"
-// 	"Accept: application/json\r\n"
-// 	"Content-Type: application/json\r\n"
-// 	"Content-Length: 85\r\n"
-// 	"Host: reqbin.com\r\n"
-// 	"\r\n\r\n"
-// 	"{\r\n"
-// 	"Id: 12345,\r\n"
-// 	"Customer: John Smit,\r\n"
-// 	"Quantity: 1,\r\n"
-// 	"Price: 10.00\r\n"
-// 	"}\r\n"
-// 	"\r\n\r\n";
+int main()
+{
+	std::string POST_HTTP  =
+	"c\r\n"
+    "<h1>go!</h1>\r\n"
+    "1b\r\n"
+    "<h1>first chunk loaded</h1>\r\n"
+    "2a\r\n"
+    "<h1>second chunk loaded and displayed</h1>\r\n"
+	"29\r\n"
+    "<h1>third chunk loaded and displayed</h1>\r\n"
+    "0\r\n"
+	"\r\n"
+	;
+	std::cout << convert_hex_to_decimal("c") << "\n";
+	//body_chunked_encoding(POST_HTTP);
+	// send_request((char*)POST_HTTP.c_str());
 
-// 	bool	ended = false;
-
-// 	ended = send_request((char*)POST_HTTP.c_str());
-
-// }
+}

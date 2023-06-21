@@ -11,23 +11,16 @@
 # include <fstream>
 # include <map>
 
-struct header_fields
-{
-			 //Header	 //Header Value
-	std::map<std::string, std::string>		request_headers;
-	std::map<std::string, std::string>		general_headers;
-	std::map<std::string, std::string>		representation_headers;
-};
-
 struct request
 {
 	std::string		method;
 	std::string		uri;
-	// header_fields	headers;
-	std::map<std::string, std::string>		headers;
 	std::string		body;
 	std::string		status;
+	std::map<std::string, std::string>		headers;
 
-	bool parse_request_data(std::string&);
-	void print_request();                   // For debugging the parsing
+	bool	parse_request_data(std::string&);
+	void	print_request();                   // For debugging the parsing
 };
+
+bool	body_chunked_encoding(std::string body);
