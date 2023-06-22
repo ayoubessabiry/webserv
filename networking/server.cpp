@@ -4,7 +4,9 @@
 void	Server::create_socket(){
 	addrinfo	hints, *bind_addr;
 	int			s;
+	int			a;
 
+	a = 1;
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
@@ -16,6 +18,10 @@ void	Server::create_socket(){
 	_socket = socket(bind_addr->ai_family, bind_addr->ai_socktype, bind_addr->ai_protocol);
 	if (_socket == -1){
 		std::cerr << "socket() error: " << std::strerror(errno);
+		exit(1);
+	}
+	if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &a, sizeof(int)) < 0){
+		std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
 		exit(1);
 	}
 	if (bind(_socket, bind_addr->ai_addr, bind_addr->ai_addrlen) == -1){
