@@ -42,7 +42,7 @@ struct server_block
 	std::string					root;
 	std::string					auto_index;
 	std::string					access_log;
-	std::vector<std::string>	ports;
+	std::string					ports;
 	std::vector<std::string>	indexes;
 	std::vector<std::string>	errors;
 	std::vector<std::string>	methods;
@@ -53,23 +53,8 @@ struct webserver
 {
 	std::vector<server_block>	server_blocks;
 	std::vector<std::string>	config_tokens;
-	void        				lexe_config(std::string config_file_data);
 	void						parse_server_block(std::string config_file_data);
 	void						print_config_file();	// For debugging
+	bool						check_if_server_repeated();
 };
-
-bool						check_if_port_valid(std::string);
-bool						check_if_host_valid(std::string);
-bool						check_if_method_valid(std::string);
-bool						check_if_directive_valid(std::string);
-int							return_state(std::string);
-int							get_port(std::vector<std::string>);
-size_t						get_client_max_body_size(std::string);
-std::string 				get_server_name(std::string);
-std::vector<std::string>	get_methods(std::string);
-std::vector<std::string>	get_errors(std::string);
-std::string					get_index(std::string);
-std::string					get_auto_index_state(std::string);
-std::string					get_cgi_path(std::string);
-std::string					get_cgi_exec(std::string);
 
