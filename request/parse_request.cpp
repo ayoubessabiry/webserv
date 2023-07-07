@@ -49,11 +49,30 @@ size_t	convert_hex_to_decimal(std::string hex_number)
 
 bool body_chunked_encoding(std::string body)
 {
-	std::ofstream		chunk_file;
-	std::stringstream	chunk_stream(body);
-	std::string			chunk_size;
+	bool				chunking_done = false;
 
-	return false;
+	size_t find = body.find("\r\n\r\n");
+	std::string body_line;
+	std::stringstream	body_data(body);
+	std::getline(body_data, body_line, '\r');
+	size_t chunk_size = convert_hex_to_decimal(body_line);
+
+	std::string	chunk_data = "";
+	while (std::getline(body_data, body_line, '\r')) 
+	{
+		chunk_data += body_line;
+		if (chunk_data.size() - 1 >= chunk_size)
+		{
+			std::cout << "Body: " << chunk_data.substr(0, 2 * chunk_data.size() - chunk_size) << "\n";
+			body_data << chunk_data.substr(0, 2 * chunk_data.size() - chunk_size);
+			chunk_data = "";
+			std::getline(body_data, body_line, '\r');
+			chunk_size = convert_hex_to_decimal(body_line);
+		}
+		chunking_done = (chunk_size == 0);
+	}
+
+	return chunking_done;
 }
 
 bool request::parse_request_data(std::string &req)
@@ -80,6 +99,11 @@ bool request::parse_request_data(std::string &req)
 	// Retrieve Headers with there values
 	while (std::getline(header_data, line))
 	{
+		if (line.size() > 8192)
+		{
+			status = "400";
+			return false;
+		}
 		std::stringstream	field_data(line);
 		std::string			value;
 		std::string 		field;
@@ -115,8 +139,7 @@ bool request::parse_request_data(std::string &req)
 
 // Check if request is done
 bool	send_request(char *buff)
-{
-	std::string		request_buffer 
+{ 
 	std::fstream 	post_file;
 	std::string buffer = std::string(buff);
 
@@ -131,22 +154,21 @@ bool	send_request(char *buff)
 	return true;
 }
 
-int main()
-{
-	std::string POST_HTTP  =
-	"c\r\n"
-    "<h1>go!</h1>\r\n"
-    "1b\r\n"
-    "<h1>first chunk loaded</h1>\r\n"
-    "2a\r\n"
-    "<h1>second chunk loaded and displayed</h1>\r\n"
-	"29\r\n"
-    "<h1>third chunk loaded and displayed</h1>\r\n"
-    "0\r\n"
-	"\r\n"
-	;
-	std::cout << convert_hex_to_decimal("c") << "\n";
-	//body_chunked_encoding(POST_HTTP);
-	// send_request((char*)POST_HTTP.c_str());
-
-}
+// int main()
+// {
+// 	std::string POST_HTTP  =
+// 	"e\r\n"
+//     "<h1>go!</h1\r\n"
+// 	"e\r\ner\r\n"
+//     "1b\r\n"
+//     "<h1>first chunk loaded</h1>\r\n"
+//     "2a\r\n"
+//     "<h1>second chunk loaded and displayed</h1>\r\n"
+// 	"29\r\n"
+//     "<h1>third chunk loaded and displayed</h1>\r\n"
+//     "0\r\n"
+// 	"\r\n"
+// 	;
+// 	body_chunked_encoding(POST_HTTP);
+// 	// send_request((char*)POST_HTTP.c_str());
+// }
