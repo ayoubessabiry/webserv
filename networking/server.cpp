@@ -4,7 +4,9 @@
 void	Server::create_socket(){
 	addrinfo	hints, *bind_addr;
 	int			s;
+	int			a;
 
+	a = 1;
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
@@ -18,6 +20,10 @@ void	Server::create_socket(){
 		std::cerr << "socket() error: " << std::strerror(errno);
 		exit(1);
 	}
+	if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &a, sizeof(int)) < 0){
+		std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+		exit(1);
+	}
 	if (bind(_socket, bind_addr->ai_addr, bind_addr->ai_addrlen) == -1){
 		std::cerr << "bind() error: " << std::strerror(errno);
 		exit(1);
@@ -27,9 +33,50 @@ void	Server::create_socket(){
 		std::cerr << "listen() error: " << std::strerror(errno);
 		exit(1);
 	}
-	FD_ZERO(&main);
-	FD_SET(_socket, &main);
-	max_socket = _socket;
+	FD_ZERO(&masterRead);
+	FD_ZERO(&masterWrite);
+	FD_SET(_socket, &masterRead);
+	max_Rsocket = _socket;
+	max_Wsocket = 0;
+}
+
+void	Server::read_socket(){
+	fd_set	read;
+	timeval timeout = {10, 0}; // waiting for 10sec
+	int		ready_client;
+
+	read = masterRead;
+	if (select(max_Rsocket + 1, &read, 0, 0, &timeout) < 0){
+		// response with time out;
+		std::cout << "timeout" << std::endl;
+	}
+	ready_client = wait_clients(read, max_Rsocket);
+	if (ready_client == _socket)
+		add_client(ready_client);
+	else  
+		get_rqst(ready_client);
+}
+
+void	Server::write_socket(){
+	fd_set	write;
+	timeval	timeout = {10, 0}; // waiting for 10sec
+	int		ready_client;
+
+	write = masterWrite;
+	if (select(max_Rsocket + 1, 0, &write, 0, &timeout) < 0){
+		// response with time out;
+		std::cout << "timeout" << std::endl;
+	}
+	ready_client = wait_clients(write, max_Wsocket);
+	send_rqst(ready_client);
+}
+
+void	Server::start_listening(){
+	while (1){
+		read_socket(); // reading request from ready clients
+		if (max_Wsocket)
+			write_socket(); // wirting responsr for ready clients
+	}
 }
 
 void	Server::add_client(int new_client){
@@ -40,15 +87,15 @@ void	Server::add_client(int new_client){
 	client.socket = new_socket;
 	client.recv_byte = 0;
 	clients.push_back(client);
-	FD_SET(new_socket, &main);
-	(new_socket > max_socket) ? max_socket = new_socket : max_socket; 
+	FD_SET(new_socket, &masterRead);
+	(new_socket > max_Rsocket) ? max_Rsocket = new_socket : max_Rsocket; 
 }
 
-int		Server::wait_clients(fd_set	ready){
+int		Server::wait_clients(fd_set	ready, int max_sock){
 	int i = 1;
-	while (i <= max_socket && !FD_ISSET(i, &ready))
+	while (i <= max_sock && !FD_ISSET(i, &ready))
 		++i;
-	return ((i > max_socket) ? -1 : i);
+	return ((i > max_sock) ? -1 : i);
 }
 
 void	Server::get_rqst(int ready_client){
@@ -59,15 +106,16 @@ void	Server::get_rqst(int ready_client){
 	while (ready_client != clients[i].socket)
 		++i;
 	clients[i].recv_byte += recv(ready_client, buff, MAX_REQUEST_SIZE, 0);
+
 	if(send_request(buff)){
-		std::cout << "req done!" << std::endl;
+		// move ready_client to send();
+		FD_SET(ready_client, &masterWrite);
+		(ready_client > max_Wsocket) ? max_Wsocket = ready_client : max_Wsocket;
 	}
 }
 
 void	Server::send_rqst(int ready_client){
-
 	char buff[] = "HTTP/1.1 HTTP/1.1 200 OK\nDate: Sun, 18 Oct 2012 10:36:20 GMT\nServer: Apache/2.2.14 (Win32)\nContent-Length: 88\nConnection: Closed\nContent-Type: text/html;\ncharset=iso-8859-1\n\r\n\r<html><body><h1>Hello, World!</h1></body></html>";
-
 	send(ready_client, buff, sizeof buff, 0);
-	exit(1);
+	// exit(1);
 }
