@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbaich <adbaich@student.42.fr>            +#+  +:+       +#+        */
+/*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/01 13:46:24 by adbaich           #+#    #+#             */
-/*   Updated: 2023/06/22 22:43:57 by adbaich          ###   ########.fr       */
+/*   Updated: 2023/07/07 13:37:17 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "include/header.hpp"
+#include "headers/header.hpp"
 
 std::string ft_get_path(std::string request, std::string &method)
 {
@@ -86,7 +86,7 @@ void ft_error(const char *file_err, int i, _MAP types_map)
 
 	tmp.append(file_err);
 	std::string extension = get_ext(tmp);
-	ft_get(tmp.c_str(), i, types_map, extension);
+	// ft_get(tmp.c_str(), i, types_map, extension);
 }
 
 int isDirectory(const char *path)

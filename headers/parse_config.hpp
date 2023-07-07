@@ -10,11 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <sstream>
-#include <stack>
+#ifndef PARSE_CONFIG_HPP
+# define PARSE_CONFIG_HPP
+# include "webserv.hpp"
 
 enum parsing_state
 {
@@ -58,3 +56,4 @@ struct webserver
 	bool						check_if_server_repeated();
 };
 
+#endif
