@@ -4,4 +4,3 @@ int main(){
 	Server s("8080", 0);
 	return 0;
 }
-
