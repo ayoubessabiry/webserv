@@ -10,11 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <sstream>
-#include <stack>
+#ifndef PARSE_CONFIG_HPP
+# define PARSE_CONFIG_HPP
+# include "webserv.hpp"
 
 enum parsing_state
 {
@@ -73,3 +71,4 @@ std::string					get_auto_index_state(std::string);
 std::string					get_cgi_path(std::string);
 std::string					get_cgi_exec(std::string);
 
+#endif
