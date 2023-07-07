@@ -47,6 +47,11 @@ size_t	convert_hex_to_decimal(std::string hex_number)
 	return num;
 }
 
+bool	valid_method(std::string method)
+{
+	return method == "GET" | method == "POST" | method == "DELETE";
+}
+
 bool body_chunked_encoding(std::string body)
 {
 	bool				chunking_done = false;
@@ -96,6 +101,12 @@ bool request::parse_request_data(std::string &req)
 	std::getline(first_line_data, method, ' ');
 	std::getline(first_line_data, uri, ' ');
 
+	if (!valid_method(method))
+	{
+		status = "400";
+		return false;
+	}
+
 	// Retrieve Headers with there values
 	while (std::getline(header_data, line))
 	{
@@ -119,7 +130,6 @@ bool request::parse_request_data(std::string &req)
 	if (body.empty() && method == "GET")
 	{
 		request_ended = true;
-		std::cout << "Ended\n";
 	}
 	if (method == "POST")
 	{
@@ -132,6 +142,7 @@ bool request::parse_request_data(std::string &req)
 		// Chunked transfer encoding : not done yet
 		if (headers["Transfer-Encoding"] == "chunked")
 			request_ended = body_chunked_encoding(body);
+		
 	}
 
 	return request_ended;
@@ -153,22 +164,3 @@ bool	send_request(char *buff)
 
 	return true;
 }
-
-// int main()
-// {
-// 	std::string POST_HTTP  =
-// 	"e\r\n"
-//     "<h1>go!</h1\r\n"
-// 	"e\r\ner\r\n"
-//     "1b\r\n"
-//     "<h1>first chunk loaded</h1>\r\n"
-//     "2a\r\n"
-//     "<h1>second chunk loaded and displayed</h1>\r\n"
-// 	"29\r\n"
-//     "<h1>third chunk loaded and displayed</h1>\r\n"
-//     "0\r\n"
-// 	"\r\n"
-// 	;
-// 	body_chunked_encoding(POST_HTTP);
-// 	// send_request((char*)POST_HTTP.c_str());
-// }

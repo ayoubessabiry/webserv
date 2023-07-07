@@ -24,3 +24,4 @@ struct request
 };
 
 bool	body_chunked_encoding(std::string body);
+bool	valid_method(std::string body);
