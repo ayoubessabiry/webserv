@@ -33,19 +33,19 @@ void	Server::create_socket(){
 		std::cerr << "listen() error: " << std::strerror(errno);
 		exit(1);
 	}
-	FD_ZERO(&masterRead);
-	FD_ZERO(&masterWrite);
-	FD_SET(_socket, &masterRead);
-	max_Rsocket = _socket;
-	max_Wsocket = 0;
+	FD_ZERO(&Read);
+	FD_ZERO(&Write);
+	FD_SET(_socket, &Read);
+	// max_Rsocket = _socket;
+	// max_Wsocket = 0;
 }
 
-void	Server::add_client(int new_client){
+
+void	Server::add_client(int new_client, fd_set masterRead, int max_Rsocket){
 	int		new_socket;
 	Client	client;
 
 	new_socket = accept(new_client, (sockaddr *)&client.client_add, &client.addr_size);
-	printf("new c = %d\n", new_client);
 	client.socket = new_socket;
 	client.recv_byte = 0;
 	clients.push_back(client);
@@ -60,14 +60,13 @@ int		Server::wait_clients(fd_set	ready, int max_sock){
 	return ((i > max_sock) ? -1 : i);
 }
 
-void	Server::get_rqst(int ready_client){
+void	Server::get_rqst(int ready_client, fd_set masterWrite, int max_Wsocket){
 	int				i = 0;
 	char			buff[MAX_REQUEST_SIZE + 1];
 
 	memset(&buff, 0, MAX_REQUEST_SIZE + 1);
 	while (ready_client != clients[i].socket)
 		++i;
-	printf("here\n");
 	clients[i].recv_byte += recv(ready_client, buff, MAX_REQUEST_SIZE, 0);
 	if(send_request(buff)){
 		// move ready_client to send();

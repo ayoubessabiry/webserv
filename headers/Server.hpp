@@ -7,8 +7,8 @@ class Server
 public :
 	std::vector<Client>	clients;
 	std::string			_server_name;
-	fd_set				masterRead;
-	fd_set				masterWrite;
+	fd_set				Read;
+	fd_set				Write;
 	int					max_Rsocket;
 	int					max_Wsocket;
 	int					_socket;
@@ -19,10 +19,12 @@ public :
 		create_socket();
 	}
 	void	create_socket();
-	void	add_client(int new_client);
-	void	get_rqst(int ready_clien);
+	void	start_listening();
+	void	add_client(int new_client, fd_set masterRead, int max_Rsocket);
+	void	get_rqst(int ready_client, fd_set masterWrite, int max_Wsocket);
 	void	send_rqst(int ready_client);
 	int		wait_clients(fd_set ready, int max_sock);
+
 };
 
 
