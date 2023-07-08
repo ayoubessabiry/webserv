@@ -40,7 +40,7 @@ struct server_block
 	std::string					root;
 	std::string					auto_index;
 	std::string					access_log;
-	std::string					ports;
+	std::string					port;
 	std::vector<std::string>	indexes;
 	std::vector<std::string>	errors;
 	std::vector<std::string>	methods;

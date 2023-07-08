@@ -40,55 +40,17 @@ void	Server::create_socket(){
 	max_Wsocket = 0;
 }
 
-void	Server::read_socket(){
-	fd_set	read;
-	timeval timeout = {10, 0}; // waiting for 10sec
-	int		ready_client;
-
-	read = masterRead;
-	if (select(max_Rsocket + 1, &read, 0, 0, &timeout) < 0){
-		// response with time out;
-		std::cout << "timeout" << std::endl;
-	}
-	ready_client = wait_clients(read, max_Rsocket);
-	if (ready_client == _socket)
-		add_client(ready_client);
-	else  
-		get_rqst(ready_client);
-}
-
-void	Server::write_socket(){
-	fd_set	write;
-	timeval	timeout = {10, 0}; // waiting for 10sec
-	int		ready_client;
-
-	write = masterWrite;
-	if (select(max_Rsocket + 1, 0, &write, 0, &timeout) < 0){
-		// response with time out;
-		std::cout << "timeout" << std::endl;
-	}
-	ready_client = wait_clients(write, max_Wsocket);
-	send_rqst(ready_client);
-}
-
-void	Server::start_listening(){
-	while (1){
-		read_socket(); // reading request from ready clients
-		if (max_Wsocket)
-			write_socket(); // wirting responsr for ready clients
-	}
-}
-
 void	Server::add_client(int new_client){
 	int		new_socket;
 	Client	client;
 
 	new_socket = accept(new_client, (sockaddr *)&client.client_add, &client.addr_size);
+	printf("new c = %d\n", new_client);
 	client.socket = new_socket;
 	client.recv_byte = 0;
 	clients.push_back(client);
 	FD_SET(new_socket, &masterRead);
-	(new_socket > max_Rsocket) ? max_Rsocket = new_socket : max_Rsocket; 
+	(new_socket > max_Rsocket) ? max_Rsocket = new_socket : max_Rsocket;
 }
 
 int		Server::wait_clients(fd_set	ready, int max_sock){
@@ -105,8 +67,8 @@ void	Server::get_rqst(int ready_client){
 	memset(&buff, 0, MAX_REQUEST_SIZE + 1);
 	while (ready_client != clients[i].socket)
 		++i;
+	printf("here\n");
 	clients[i].recv_byte += recv(ready_client, buff, MAX_REQUEST_SIZE, 0);
-
 	if(send_request(buff)){
 		// move ready_client to send();
 		FD_SET(ready_client, &masterWrite);
@@ -117,5 +79,6 @@ void	Server::get_rqst(int ready_client){
 void	Server::send_rqst(int ready_client){
 	char buff[] = "HTTP/1.1 HTTP/1.1 200 OK\nDate: Sun, 18 Oct 2012 10:36:20 GMT\nServer: Apache/2.2.14 (Win32)\nContent-Length: 88\nConnection: Closed\nContent-Type: text/html;\ncharset=iso-8859-1\n\r\n\r<html><body><h1>Hello, World!</h1></body></html>";
 	send(ready_client, buff, sizeof buff, 0);
+	// close(ready_client);
 	// exit(1);
 }
