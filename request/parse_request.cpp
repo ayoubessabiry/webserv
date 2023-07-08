@@ -160,7 +160,7 @@ bool	send_request(char *buff)
 	bool ended = _request.parse_request_data(buffer);
 	// _request.print_request();
 
-	return ended;
+	return false;
 }
 
 // int main(int ac, char **av)
