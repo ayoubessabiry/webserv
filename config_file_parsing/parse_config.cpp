@@ -1,4 +1,4 @@
-#include "parse_config.hpp"
+#include "../headers/parse_config.hpp"
 
 bool	check_if_directive_valid(std::string directive)
 {
@@ -65,12 +65,6 @@ int	get_port(std::vector<std::string> config_tokens)
 		port += config_tokens[i];
 	}
 	return std::stoi(port);
-}
-
-bool	webserver::check_if_server_repeated()
-{
-	
-	return true;
 }
 
 void webserver::parse_server_block(std::string config_file_data)

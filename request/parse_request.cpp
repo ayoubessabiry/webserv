@@ -12,7 +12,6 @@
 
 #include "parse_request.hpp"
 
-// test if the parsing is working correctly
 void request::print_request()
 {
 	std::map<std::string, std::string>::iterator	it;
@@ -68,7 +67,6 @@ bool body_chunked_encoding(std::string body)
 		chunk_data += body_line;
 		if (chunk_data.size() - 1 >= chunk_size)
 		{
-			std::cout << "Body: " << chunk_data.substr(0, 2 * chunk_data.size() - chunk_size) << "\n";
 			body_data << chunk_data.substr(0, 2 * chunk_data.size() - chunk_size);
 			chunk_data = "";
 			std::getline(body_data, body_line, '\r');
@@ -91,7 +89,6 @@ bool request::parse_request_data(std::string &req)
 	if (find >= req.size())
 		body = req.substr(find, req.size() - 1);
 
-	// Retrieve method and uri
 	std::stringstream header_data(header_half);
 	std::string	line;
 	std::getline(header_data, line, '\r');
@@ -107,7 +104,6 @@ bool request::parse_request_data(std::string &req)
 		return false;
 	}
 
-	// Retrieve Headers with there values
 	while (std::getline(header_data, line))
 	{
 		if (line.size() > 8192)
@@ -139,28 +135,35 @@ bool request::parse_request_data(std::string &req)
 			std::istringstream(headers["Content-Length"]) >> content_length;
 			request_ended = (body.size() == content_length);
 		}
-		// Chunked transfer encoding : not done yet
 		if (headers["Transfer-Encoding"] == "chunked")
 			request_ended = body_chunked_encoding(body);
-		
 	}
 
 	return request_ended;
 }
 
-// Check if request is done
 bool	send_request(char *buff)
 { 
-	std::fstream 	post_file;
+	std::string		r_http = "";
+	// static std::ofstream request_file;
 	std::string buffer = std::string(buff);
 
-	post_file.open("yekh", std::ios::in | std::ios::out);
-	std::cout << buff << std::endl;
-	// post_file << buff;
+	// request_file.open("test", std::ios_base::app);
 
-	request _request;
-	bool ended = _request.parse_request_data(buffer);
-	_request.print_request();
+	r_http += std::string(buff);
 
-	return true;
+	std::cout << r_http;
+
+	// request_file << buff;
+	// std::cout << request_file.rdbuf();
+	// request _request;
+	// bool ended = _request.parse_request_data(buffer);
+	// _request.print_request();
+
+	return false;
 }
+
+// int main(int ac, char **av)
+// {
+
+// }

@@ -53,7 +53,6 @@ struct webserver
 	std::vector<std::string>	config_tokens;
 	void						parse_server_block(std::string config_file_data);
 	void						print_config_file();	// For debugging
-	bool						check_if_server_repeated();
 };
 
 #endif

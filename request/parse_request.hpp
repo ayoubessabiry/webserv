@@ -17,10 +17,11 @@ struct request
 	std::string		uri;
 	std::string		body;
 	std::string		status;
+	std::string 	file_name;
 	std::map<std::string, std::string>		headers;
 
 	bool	parse_request_data(std::string&);
-	void	print_request();                   // For debugging the parsing
+	void	print_request();
 };
 
 bool	body_chunked_encoding(std::string body);
