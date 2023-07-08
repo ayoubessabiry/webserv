@@ -1,28 +1,30 @@
-#pragma once
-#include "header.hpp"
+#ifndef SERVER_HPP_GARD
+# define SERVER_HPP_GARD
+# include "Client.hpp"
 
-class server
+class Server  
 {
-	struct addrinfo *bind_address;
-	fd_set current_sockets, ready_sockets;
-	SOCKET socket_listen;
-	std::string		method;
-	int i;
-	bool	forbidden;
-    _MAP types_map;
+public :
+	std::vector<Client>	clients;
+	std::string			_server_name;
+	fd_set				masterRead;
+	fd_set				masterWrite;
+	int					max_Rsocket;
+	int					max_Wsocket;
+	int					_socket;
+	const char*			_port;
+	const char*			_host;
 
-	void local_add_conf(char **av);
-	void socket_cr();
-	void sock_add_bind();
-	void sock_listen();
-	void sock_set();
-	void sock_ser_up();
-	void sock_cl_up();
-
-public:
-
-	std::string data;
-	server();
-	~server();
-	void start(char **av);
+	Server(const char* port, const char* host, std::string server_name) : _port(port), _host(host), _server_name(server_name){
+		create_socket();
+	}
+	void	create_socket();
+	void	add_client(int new_client);
+	void	get_rqst(int ready_clien);
+	void	send_rqst(int ready_client);
+	int		wait_clients(fd_set ready, int max_sock);
 };
+
+
+
+#endif

@@ -1,4 +1,4 @@
-#include "parse_config.hpp"
+#include "../headers/parse_config.hpp"
 
 bool	check_if_directive_valid(std::string directive)
 {
@@ -118,7 +118,7 @@ void webserver::parse_server_block(std::string config_file_data)
 			server.root.clear();
 			server.server_name.clear();
 			server.auto_index.clear();
-			server.ports.clear();
+			server.port.clear();
 			server.methods.clear();
 			server.errors.clear();
 			server.indexes.clear();
@@ -158,7 +158,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				i++;
 				port_directive_numbers++;
 				if (check_if_port_valid(config_tokens[i]))
-					server.ports = (config_tokens[i++]);
+					server.port = (config_tokens[i++]);
 				if (config_tokens[i] != ";")
 				{
 					std::cout << "ERROR\n";
@@ -350,10 +350,10 @@ void	webserver::print_config_file()
 			std::cout << "\t Auto-index: " << server_blocks[i].auto_index << "\n";
 		if (!server_blocks[i].root.empty())
 			std::cout << "\tRoot: " << server_blocks[i].root << "\n";
-		if (!server_blocks[i].ports.empty())
+		if (!server_blocks[i].port.empty())
 		{
-			std::cout << "\t----Ports-----\n"; 
-			std::cout << "\t\t Port: " << " " << server_blocks[i].ports << "\n";
+			std::cout << "\t----port-----\n"; 
+			std::cout << "\t\t Port: " << " " << server_blocks[i].port << "\n";
 		}
 		if (!server_blocks[i].methods.empty())
 		{
