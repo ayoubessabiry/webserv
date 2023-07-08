@@ -155,12 +155,12 @@ bool	send_request(char *buff)
 	std::cout << r_http;
 
 	// request_file << buff;
-	// std::cout << request_file.rdbuf();
+	// std::cout << r_http;
 	// request _request;
-	// bool ended = _request.parse_request_data(buffer);
+	bool ended = _request.parse_request_data(buffer);
 	// _request.print_request();
 
-	return false;
+	return ended;
 }
 
 // int main(int ac, char **av)
