@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parse_request.hpp"
+#include "../headers/parse_request.hpp"
 
 void request::print_request()
 {
@@ -150,16 +150,16 @@ bool request::parse_request_data(std::string &req)
 
 request _request;
 
-bool	send_request(char *buff)
+bool	send_request(Client& client)
 { 
 	static std::string		r_http = "";
 	std::string		temp_string;
-	std::string buffer = std::string(buff);
+	std::string buffer = std::string(client.buff);
 
 	if (_request.method == "POST")
 		r_http = "";
 
-	r_http += std::string(buff);
+	r_http += std::string(client.buff);
 
 	std::cout << r_http << std::endl;
 
@@ -169,14 +169,14 @@ bool	send_request(char *buff)
 	return false;
 }
 
-int main()
-{
-	std::ofstream file;
+// int main()
+// {
+// 	std::ofstream file;
 
-	request rqst;
+// 	request rqst;
 
-	// file.open(rqst.random_file_name_generate());
-	file.open("ttt");
+// 	// file.open(rqst.random_file_name_generate());
+// 	file.open("ttt");
 
-	file << "eret00000fghdtffgh";
-}
+// 	file << "eret00000fghdtffgh";
+// }

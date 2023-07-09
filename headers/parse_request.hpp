@@ -1,15 +1,6 @@
-
-# include <string.h>
-# include <iostream>
-# include <sstream>
-# include <cctype>
-# include <ctime>
-# include <vector>
-# include <cstring>
-# include <string>
-# include <cstdio>
-# include <fstream>
-# include <map>
+#ifndef PARSE_REQ_GARD
+# define PARSE_REQ_GARD
+# include "Client.hpp"
 
 struct request
 {
@@ -29,3 +20,7 @@ struct request
 };
 
 bool	valid_method(std::string body);
+
+bool	send_request(Client& client);
+
+# endif

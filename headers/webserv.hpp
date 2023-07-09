@@ -15,14 +15,13 @@
 # include <vector>
 # include <cstring>
 # include <string>
+# include <sstream>
 # include <cstdlib>
 # include <cstdio>
 # include <fstream>
 # include <map>
-# include "../request/parse_request.hpp"
 
 # define BACKLOG  32767
 
-bool	send_request(char	*buff);
 
 #endif
