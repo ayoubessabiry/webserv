@@ -9,7 +9,8 @@ class Client
 public : 	
 	socklen_t			addr_size;
 	sockaddr_storage	client_add;
-	std::string			request;
+	// std::string			request;
+	// request				_request;
 	ssize_t				recv_byte;
 	ssize_t				header_byte;
 	ssize_t				body_byte;

@@ -1,4 +1,6 @@
 
+#pragma once
+
 # include <string.h>
 # include <iostream>
 # include <sstream>
@@ -21,6 +23,8 @@ struct request
 	std::map<std::string, std::string>		headers;
 
 	std::ofstream	body_file;
+
+	bool			is_reading_body;
 
 	std::string	random_file_name_generate();
 	bool	parse_request_data(std::string&);

@@ -10,16 +10,20 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parse_request.hpp"
+#include "../headers/parse_request.hpp"
 
 void request::print_request()
 {
 	std::map<std::string, std::string>::iterator	it;
 
 	std::cout << "\e[1;33m----------Request Line----------\n";
-	std::cout << "\e[1;33m Method: \e[0;33m" << method << "\n";
-	std::cout << "\e[1;33m Request Uri: \e[0;33m" << uri << "\n";
-	std::cout << "\n\n";
+	// if (!method.empty())
+		std::cout << "\e[1;33m Method: \e[0;33m" << method << "\n";
+	// if (!method.uri())
+	{
+		std::cout << "\e[1;33m Request Uri: \e[0;33m" << uri << "\n";
+		std::cout << "\n\n";
+	}
 
 	for	(it = headers.begin(); it != headers.end() ; ++it)
 	{
@@ -98,9 +102,10 @@ bool request::parse_request_data(std::string &req)
 {
 	bool	request_ended = false;
 
-	std::size_t find = req.find("\r\n\r\n");
-	if (find != std::string::npos)
+	if (!strstr(req.c_str(), "\r\n\r\n") && !is_reading_body)
 		return false;
+
+	std::size_t find = req.find("\r\n\r\n");
 
 	std::string header_half = req.substr(0, find);
 
@@ -127,13 +132,20 @@ bool request::parse_request_data(std::string &req)
 			headers.insert(std::make_pair<std::string, std::string>(std::string(field), value));
 	}
 
+	if (method != "GET" || method != "POST" || method != "DELETE")
+	{
+		return true;
+		status = "400";
+	}
 	if (method == "GET")
 		return true;
 
 	if (method == "POST")
 	{
-		if (headers.count("Content-Length"))
+		is_reading_body = true;
+		if (headers.count("Content-Length") >= 1)
 		{
+			std::cout << "Here" << std::endl;
 			body += req;
 			body_file << req;
 			int	content_length;
@@ -148,35 +160,23 @@ bool request::parse_request_data(std::string &req)
 	return false;
 }
 
-request _request;
-
 bool	send_request(char *buff)
 { 
-	static std::string		r_http = "";
+	request _request;
+
+	_request.body_file.open(_request.random_file_name_generate());
+	_request.is_reading_body = false;
+	_request.body = "";
 	std::string		temp_string;
 	std::string buffer = std::string(buff);
 
-	if (_request.method == "POST")
-		r_http = "";
+	// if (!buff)
+	std::cout << buff;
 
-	r_http += std::string(buff);
-
-	std::cout << r_http << std::endl;
-
-	bool ended = _request.parse_request_data(buffer);
+	bool ended = _request.parse_request_data(r_http);
+	// if (ended)
+	// 	std::cout << "Request Ended !!" << std::endl;
 	// _request.print_request();
 
 	return false;
-}
-
-int main()
-{
-	std::ofstream file;
-
-	request rqst;
-
-	// file.open(rqst.random_file_name_generate());
-	file.open("ttt");
-
-	file << "eret00000fghdtffgh";
 }
