@@ -6,13 +6,14 @@
 /*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 10:17:07 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/08 16:38:20 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/09 11:21:41 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef INIT_HPP_GARD
 # define INIT_HPP_GARD
 # include "Server.hpp"
+# include "Client.hpp"
 
 /*
 
@@ -26,9 +27,12 @@
 
 class Init{
 public:
-	std::vector<Server> server;
+	std::vector<Server>	server;
+	std::vector<Client>	clients;
 	fd_set				masterRead;
 	fd_set				masterWrite;
+	fd_set				read;
+	fd_set				write;
 	int					max_Rsocket;
 	int					max_Wsocket;
 
@@ -43,13 +47,19 @@ public:
 			if (server[i]._host == s._host && server[i]._port == s._port)
 				return ;
 		}
+		s.create_socket();
 		server.push_back(s);
 		FD_SET(s._socket, &masterRead);
 		(s._socket > max_Rsocket) ? max_Rsocket = s._socket : max_Rsocket;
 	}
 	void	start_listening();
-	void	read_socket(Server& s);
-	void	write_socket(Server& s);
+	void	read_socket(int ready_client);
+	void	write_socket(int ready_client);
+	int		wait_clients(fd_set ready, int max_sock);
+	void	add_client(int new_client);
+	void	get_rqst(int ready_client);
+	void	send_rqst(int ready_client);
+
 };
 
 #endif
