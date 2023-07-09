@@ -1,7 +1,7 @@
 #ifndef CLIENT_HPP_GARD
 # define CLIENT_HPP_GARD
 # include "webserv.hpp"
-# define MAX_REQUEST_SIZE 2047
+# define MAX_REQUEST_SIZE 30000
 
 
 class Client  
