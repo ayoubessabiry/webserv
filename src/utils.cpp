@@ -6,11 +6,11 @@
 /*   By: adbaich <adbaich@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/01 13:46:24 by adbaich           #+#    #+#             */
-/*   Updated: 2023/06/22 22:43:57 by adbaich          ###   ########.fr       */
+/*   Updated: 2023/07/09 18:11:07 by adbaich          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "include/header.hpp"
+#include "../include/header.hpp"
 
 std::string ft_get_path(std::string request, std::string &method)
 {
@@ -240,4 +240,23 @@ std::string	getRangeFromFile(const char* path, int start, size_t buffer_size)
 	std::string	body(buffer);
 	delete [] buffer;
 	return body;
+}
+
+std::string	intToString(int	num) {
+
+	std::string string;
+
+	if (!num)
+	{
+		string.append("0");
+	}
+	while (num)
+	{
+		char c;
+		c = (num % 10) + '0';
+		string += c;
+		num = num / 10;
+	}
+	string = std::string(string.rbegin(), string.rend());
+	return string;
 }

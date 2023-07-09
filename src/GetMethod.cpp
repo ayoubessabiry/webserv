@@ -1,4 +1,4 @@
-#include "include/GetMethod.hpp"
+#include "../include/GetMethod.hpp"
 
 void GetMethod::setInvalidResource()
 {
