@@ -34,13 +34,13 @@ void	Init::add_client(int new_client){
 
 void	Init::get_rqst(int ready_client){
 	int				i = 0;
-	char			buff[MAX_REQUEST_SIZE + 1];
+	// char			buff[MAX_REQUEST_SIZE + 1];
 
-	memset(&buff, 0, MAX_REQUEST_SIZE + 1);
 	while (i < clients.size() && ready_client != clients[i].socket)
 		++i;
-	clients[i].recv_byte += recv(ready_client, &buff, sizeof (buff), 0);
-	if(send_request(buff)){
+	memset(&clients[i].buff, 0, MAX_REQUEST_SIZE);
+	clients[i].recv_byte += recv(ready_client, &clients[i].buff, MAX_REQUEST_SIZE, 0);
+	if(send_request(clients[i])){
 		// move ready_client to send();
 		FD_CLR(ready_client, &masterRead);
 		FD_SET(ready_client, &masterWrite);

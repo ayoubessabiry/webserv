@@ -15,6 +15,7 @@
 # include <vector>
 # include <cstring>
 # include <string>
+# include <sstream>
 # include <cstdlib>
 # include <cstdio>
 # include <fstream>
@@ -23,6 +24,5 @@
 
 # define BACKLOG  32767
 
-bool	send_request(char	*buff);
 
 #endif

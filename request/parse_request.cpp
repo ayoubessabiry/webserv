@@ -160,7 +160,9 @@ bool request::parse_request_data(std::string &req)
 	return false;
 }
 
-bool	send_request(char *buff)
+request _request;
+
+bool	send_request(Client& client)
 { 
 	request _request;
 
@@ -168,10 +170,14 @@ bool	send_request(char *buff)
 	_request.is_reading_body = false;
 	_request.body = "";
 	std::string		temp_string;
-	std::string buffer = std::string(buff);
+	std::string buffer = std::string(client.buff);
 
-	// if (!buff)
-	std::cout << buff;
+	if (_request.method == "POST")
+		r_http = "";
+
+	r_http += std::string(client.buff);
+
+	std::cout << r_http << std::endl;
 
 	bool ended = _request.parse_request_data(r_http);
 	// if (ended)
@@ -180,3 +186,15 @@ bool	send_request(char *buff)
 
 	return false;
 }
+
+// int main()
+// {
+// 	std::ofstream file;
+
+// 	request rqst;
+
+// 	// file.open(rqst.random_file_name_generate());
+// 	file.open("ttt");
+
+// 	file << "eret00000fghdtffgh";
+// }
