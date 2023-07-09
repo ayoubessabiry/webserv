@@ -35,6 +35,28 @@ void request::print_request()
 	}
 }
 
+std::string request::random_file_name_generate()
+{
+	std::string name = "/tmp/";
+
+	std::string char_list = "abcdefghijklmnopqrstuvzxyzABCDEFGHIJKLMNQRSTUVWXYZ";
+
+	srand(time(0));
+
+	name += char_list[rand() % char_list.size()];
+	name += char_list[rand() % char_list.size()];
+	name += char_list[rand() % char_list.size()];
+	name += char_list[rand() % char_list.size()];
+	name += char_list[rand() % char_list.size()];
+	name += char_list[rand() % char_list.size()];
+	name += char_list[rand() % char_list.size()];
+	name += char_list[rand() % char_list.size()];
+	name += char_list[rand() % char_list.size()];
+	name += char_list[rand() % char_list.size()];
+
+	return name;
+}
+
 size_t	convert_hex_to_decimal(std::string hex_number)
 {
 	int					num;
@@ -46,16 +68,10 @@ size_t	convert_hex_to_decimal(std::string hex_number)
 	return num;
 }
 
-bool	valid_method(std::string method)
-{
-	return method == "GET" | method == "POST" | method == "DELETE";
-}
-
-bool body_chunked_encoding(std::string body)
+bool request::body_chunked_encoding(std::string &body)
 {
 	bool				chunking_done = false;
 
-	size_t find = body.find("\r\n\r\n");
 	std::string body_line;
 	std::stringstream	body_data(body);
 	std::getline(body_data, body_line, '\r');
@@ -67,7 +83,7 @@ bool body_chunked_encoding(std::string body)
 		chunk_data += body_line;
 		if (chunk_data.size() - 1 >= chunk_size)
 		{
-			body_data << chunk_data.substr(0, 2 * chunk_data.size() - chunk_size);
+			body += chunk_data;
 			chunk_data = "";
 			std::getline(body_data, body_line, '\r');
 			chunk_size = convert_hex_to_decimal(body_line);
@@ -83,11 +99,10 @@ bool request::parse_request_data(std::string &req)
 	bool	request_ended = false;
 
 	std::size_t find = req.find("\r\n\r\n");
-	std::size_t find_sec = req.find("\r\n\r\n", find + 1);
-	std::string header_half = req.substr(0, find);
+	if (find != std::string::npos)
+		return false;
 
-	if (find >= req.size())
-		body = req.substr(find, req.size() - 1);
+	std::string header_half = req.substr(0, find);
 
 	std::stringstream header_data(header_half);
 	std::string	line;
@@ -98,19 +113,8 @@ bool request::parse_request_data(std::string &req)
 	std::getline(first_line_data, method, ' ');
 	std::getline(first_line_data, uri, ' ');
 
-	if (!valid_method(method))
-	{
-		status = "400";
-		return false;
-	}
-
 	while (std::getline(header_data, line))
 	{
-		if (line.size() > 8192)
-		{
-			status = "400";
-			return false;
-		}
 		std::stringstream	field_data(line);
 		std::string			value;
 		std::string 		field;
@@ -123,47 +127,56 @@ bool request::parse_request_data(std::string &req)
 			headers.insert(std::make_pair<std::string, std::string>(std::string(field), value));
 	}
 
-	if (body.empty() && method == "GET")
-	{
-		request_ended = true;
-	}
+	if (method == "GET")
+		return true;
+
 	if (method == "POST")
 	{
-		if (headers.count("Content-Length") >= 1)
+		if (headers.count("Content-Length"))
 		{
+			body += req;
+			body_file << req;
 			int	content_length;
 			std::istringstream(headers["Content-Length"]) >> content_length;
-			request_ended = (body.size() == content_length);
+			if (body.size() == content_length)
+				return true;
 		}
-		if (headers["Transfer-Encoding"] == "chunked")
-			request_ended = body_chunked_encoding(body);
+		if (headers.count("Transfer-Encoding"))
+			return body_chunked_encoding(req) ;
 	}
 
-	return request_ended;
+	return false;
 }
+
+request _request;
 
 bool	send_request(char *buff)
 { 
-	std::string		r_http = "";
-	// static std::ofstream request_file;
+	static std::string		r_http = "";
+	std::string		temp_string;
 	std::string buffer = std::string(buff);
 
-	// request_file.open("test", std::ios_base::app);
+	if (_request.method == "POST")
+		r_http = "";
 
 	r_http += std::string(buff);
 
-	std::cout << r_http;
+	std::cout << r_http << std::endl;
 
-	// request_file << buff;
-	// std::cout << r_http;
-	// request _request;
 	bool ended = _request.parse_request_data(buffer);
 	// _request.print_request();
 
 	return false;
 }
 
-// int main(int ac, char **av)
-// {
+int main()
+{
+	std::ofstream file;
 
-// }
+	request rqst;
+
+	// file.open(rqst.random_file_name_generate());
+	file.open("ttt");
+
+	file << "eret00000fghdtffgh";
+}

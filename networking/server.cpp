@@ -65,8 +65,11 @@ void	Server::get_rqst(int ready_client, fd_set masterWrite, int max_Wsocket){
 	char			buff[MAX_REQUEST_SIZE + 1];
 
 	memset(&buff, 0, MAX_REQUEST_SIZE + 1);
+	std::cout << ready_client << " " << clients[i].socket << std::endl;
 	while (ready_client != clients[i].socket)
+	{
 		++i;
+	}
 	clients[i].recv_byte += recv(ready_client, buff, MAX_REQUEST_SIZE, 0);
 	if(send_request(buff)){
 		// move ready_client to send();

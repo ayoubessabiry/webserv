@@ -20,9 +20,12 @@ struct request
 	std::string 	file_name;
 	std::map<std::string, std::string>		headers;
 
+	std::ofstream	body_file;
+
+	std::string	random_file_name_generate();
 	bool	parse_request_data(std::string&);
+	bool	body_chunked_encoding(std::string&);
 	void	print_request();
 };
 
-bool	body_chunked_encoding(std::string body);
 bool	valid_method(std::string body);
