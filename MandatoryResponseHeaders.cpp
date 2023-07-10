@@ -48,7 +48,7 @@ void MandatoryResponseHeaders::startLine()
     startLineString.clear();
     startLineString.append("HTTP/1.1");
     startLineString.append(" ");
-    startLineString.append(std::to_string(StatusCode));
+    startLineString.append(intToString(StatusCode));
     startLineString.append(" ");
     startLineString.append(httpStatusStrings[StatusCode]);
     startLineString.append("\r\n");
@@ -58,18 +58,18 @@ void MandatoryResponseHeaders::calculateContentLength()
     contentLength.append("Content-Length: ");
     std::ifstream file;
 
-    file.open(fileName, std::ios::binary);
+    file.open(fileName.c_str(), std::ios::binary);
     file.seekg(0, file.end);
     size_t fileLength = file.tellg();
     file.seekg(0, file.beg);
     file.close();
 
-    contentLength.append(std::to_string(fileLength).c_str());
+    contentLength.append(intToString(fileLength).c_str());
     contentLength.append("\r\n");
 }
 bool MandatoryResponseHeaders::canNotOpenFileForRead()
 {
-    std::ifstream file(fileName);
+    std::ifstream file(fileName.c_str());
 
     if (!file.is_open())
     {
@@ -89,7 +89,7 @@ bool MandatoryResponseHeaders::canNotOpenFileForRead()
 }
 bool MandatoryResponseHeaders::canNotOpenFileForWrite()
 {
-    std::ofstream file(fileName);
+    std::ofstream file(fileName.c_str());
 
     if (!file.is_open())
     {

@@ -26,6 +26,8 @@ void	Init::add_client(int new_client){
 
 	new_socket = accept(new_client, (sockaddr *)&client.client_add, &client.addr_size);
 
+	client.is_reading_body = false;
+	client.rqst.body = "";
 	client.request_collector = "";
 	client.socket = new_socket;
 	client.recv_byte = 0;

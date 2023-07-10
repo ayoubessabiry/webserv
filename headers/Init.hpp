@@ -29,6 +29,7 @@ class Init{
 public:
 	std::vector<Server>	server;
 	std::vector<Client>	clients;
+	std::string			response;
 	fd_set				masterRead;
 	fd_set				masterWrite;
 	fd_set				read;
@@ -52,6 +53,7 @@ public:
 		FD_SET(s._socket, &masterRead);
 		(s._socket > max_Rsocket) ? max_Rsocket = s._socket : max_Rsocket;
 	}
+	void	send_response(Client&);
 	void	start_listening();
 	void	read_socket(int ready_client);
 	void	write_socket(int ready_client);

@@ -52,6 +52,7 @@ bool pathDoesNotExist(const char *path);
 bool canNotOpenDirectoryOrSubDirectories(const char *dir);
 void deleteDirectoryContent(std::string& dir);
 std::string	getRangeFromFile(const char* path, int start, size_t buffer_size);
+std::string	intToString(int	num);
 
 _MAP get_map();
 void insert_in_map(std::string line, _MAP &types_map);

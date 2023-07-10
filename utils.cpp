@@ -35,7 +35,7 @@ std::string ft_get_path(std::string request, std::string &method)
 bool ft_check_file(std::string file_name)
 {
 
-	std::ifstream file(file_name);
+	std::ifstream file(file_name.c_str());
 
 	if (!file.is_open())
 	{
@@ -240,4 +240,23 @@ std::string	getRangeFromFile(const char* path, int start, size_t buffer_size)
 	std::string	body(buffer);
 	delete [] buffer;
 	return body;
+}
+
+std::string	intToString(int	num) {
+
+	std::string string;
+
+	if (!num)
+	{
+		string.append("0");
+	}
+	while (num)
+	{
+		char c;
+		c = (num % 10) + '0';
+		string += c;
+		num = num / 10;
+	}
+	string = std::string(string.rbegin(), string.rend());
+	return string;
 }

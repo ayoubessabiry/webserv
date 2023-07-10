@@ -64,7 +64,7 @@ int	get_port(std::vector<std::string> config_tokens)
 	{
 		port += config_tokens[i];
 	}
-	return std::stoi(port);
+	return std::atoi(port.c_str());
 }
 
 void webserver::parse_server_block(std::string config_file_data)

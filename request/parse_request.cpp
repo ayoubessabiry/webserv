@@ -157,8 +157,12 @@ bool	send_request(Client& client)
 	{
 		GetMethod	get;
 
+
 		std::string uri = "/path/index.html";
 		get.setfileName(uri);
+		get.initGetMethod();
+		get.setBufferSize(1000);
+
 		// std::cout << client.rqst.body << std::endl;
 		client.rqst.print_request();
 		std::cout << "\nRequest Ended\n";

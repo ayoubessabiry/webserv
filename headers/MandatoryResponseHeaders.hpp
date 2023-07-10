@@ -58,12 +58,13 @@ protected:
 	/*
 	** --------------------------------- SETTERS ----------------------------------
 	*/
-	void setBytesSent(size_t b);
-	void setStatusCode(int s);
-	void setBufferSize(size_t b);
-	void setAutoIndex(bool b);
-	void setUploadDirectory(std::string& upDir);
-	void setAllowedMethods(std::vector<std::string>& a);
-	void setLocationRedirectionPath(std::string& l);
-	void setfileName(std::string& f);
+	public:
+		void setBytesSent(size_t b);
+		void setStatusCode(int s);
+		void setBufferSize(size_t b);
+		void setAutoIndex(bool b);
+		void setUploadDirectory(std::string& upDir);
+		void setAllowedMethods(std::vector<std::string>& a);
+		void setLocationRedirectionPath(std::string& l);
+		void setfileName(std::string& f);
 };

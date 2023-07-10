@@ -9,6 +9,7 @@ class GetMethod : public MandatoryResponseHeaders
     /*
     ** --------------------------------- CONSTRUCTOR ----------------------------------
     */
+    public:
 
     GetMethod();
 

@@ -1,8 +1,10 @@
 #ifndef CLIENT_HPP_GARD
 # define CLIENT_HPP_GARD
-# define MAX_REQUEST_SIZE 60000
+# define MAX_REQUEST_SIZE 65300
 # include "webserv.hpp"
 # include "parse_request.hpp"
+# include "parse_config.hpp"
+# include "GetMethod.hpp"
 
 class request
 {
@@ -16,7 +18,7 @@ class request
 
 
 		std::string	random_file_name_generate();
-		bool	parse_request_data(std::string&, bool);
+		bool	parse_request_data(std::string&, bool&);
 		bool	body_chunked_encoding(std::string&);
 		void	print_request();
 };
@@ -27,11 +29,16 @@ bool	valid_method(std::string body);
 class Client  
 {
 public : 	
+
+	// Responses
+	GetMethod			get;
+
 	socklen_t			addr_size;
 	sockaddr_storage	client_add;
 	std::string			request_collector;
 	bool				is_reading_body;
 	request				rqst;
+	server_block		configuration;
 	ssize_t				recv_byte;
 	ssize_t				header_byte;
 	ssize_t				body_byte;
