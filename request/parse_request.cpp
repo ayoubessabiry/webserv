@@ -17,9 +17,9 @@ void request::print_request()
 	std::map<std::string, std::string>::iterator	it;
 
 	std::cout << "\e[1;33m----------Request Line----------\n";
-	// if (!method.empty())
+	if (!method.empty())
 		std::cout << "\e[1;33m Method: \e[0;33m" << method << "\n";
-	// if (!method.uri())
+	if (!uri.empty())
 	{
 		std::cout << "\e[1;33m Request Uri: \e[0;33m" << uri << "\n";
 		std::cout << "\n\n";
@@ -35,7 +35,7 @@ void request::print_request()
 	if (!body.empty())
 	{
 		std::cout << "\e[1;35m---------Body------------\e[0;35m\n";
-		std::cout << "\e[1;35m" << body.size();
+		std::cout << "\e[1;35m" << body;
 	}
 }
 
@@ -76,14 +76,12 @@ bool request::body_chunked_encoding(std::string &body)
 	return chunking_done;
 }
 
-bool request::parse_request_data(std::string &appended_string, bool is_reading_body)
+bool request::parse_request_data(std::string &appended_string, bool &is_reading_body)
 {
-	if (!strstr(appended_string.c_str(), "\r\n\r\n"))
-	{
+	if (!strstr(appended_string.c_str(), "\r\n\r\n") && !is_reading_body)
 		return false;
-	}
-	std::size_t find = appended_string.find("\r\n\r\n");
 
+	std::size_t find = appended_string.find("\r\n\r\n");
 	std::string header_half = appended_string.substr(0, find);
 
 	std::stringstream header_data(header_half);
@@ -109,27 +107,18 @@ bool request::parse_request_data(std::string &appended_string, bool is_reading_b
 			headers.insert(std::make_pair<std::string, std::string>(std::string(field), value));
 	}
 
-	if (method != "GET" || method != "POST" || method != "DELETE")
+	if (method != "GET" && method != "POST" && method != "DELETE")
 	{
+		std::cout << "Here error\n";
 		return true;
 		status = "400";
 	}
 	if (method == "GET")
-	{
-		std::cout << "here\n";
 		return true;
-	}
+
 	if (method == "POST")
 	{
 		is_reading_body = true;
-		if (headers.count("Content-Length") >= 1)
-		{
-			body += appended_string;
-			int	content_length;
-			std::istringstream(headers["Content-Length"]) >> content_length;
-			if (body.size() == content_length)
-				return true;
-		}
 	}
 
 	return false;
@@ -137,15 +126,43 @@ bool request::parse_request_data(std::string &appended_string, bool is_reading_b
 
 bool	send_request(Client& client)
 {
+	std::cout << client.buff;
+
 	bool	ended = false;
 
 	client.request_collector += client.buff;
 
 	ended = client.rqst.parse_request_data(client.request_collector, client.is_reading_body);
-	client.rqst.print_request();
+
+	if (client.is_reading_body)
+	{
+		// std::cout << "here\n";
+		if (client.rqst.headers.count("Content-Length"))
+		{
+			client.rqst.body += client.buff;
+			int	content_length;
+			std::istringstream(client.rqst.headers["Content-Length"]) >> content_length;
+			if (client.rqst.body.size() >= content_length)
+			{
+				ended = true;
+			}
+		}
+		// if (client.rqst.headers.count("Transfer-Encoding"))
+		{
+			// return client.rqst.body_chunked_encoding(client.buff);
+		}
+	}
 
 	if (ended)
-		std::cout << "Request Ended";
+	{
+		GetMethod	get;
+
+		std::string uri = "/path/index.html";
+		get.setfileName(uri);
+		// std::cout << client.rqst.body << std::endl;
+		client.rqst.print_request();
+		std::cout << "\nRequest Ended\n";
+	}
 
 	return ended;
 }
