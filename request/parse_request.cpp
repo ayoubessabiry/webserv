@@ -112,6 +112,8 @@ bool request::parse_request_data(std::string &appended_string, bool &is_reading_
 		appended_string = appended_string.substr(find, appended_string.size());
 	}
 
+	// std::cout << method << "\n";
+
 	if (method != "GET" && method != "POST" && method != "DELETE" && !is_reading_body)
 	{
 		std::cout << "Here error\n";
@@ -132,6 +134,8 @@ bool request::parse_request_data(std::string &appended_string, bool &is_reading_
 bool	send_request(Client& client)
 {
 	bool	ended = false;
+
+	std::cout << client.buff << std::endl;
 
 	if (client.is_reading_body)
 		client.request_collector = "";	
@@ -163,8 +167,7 @@ bool	send_request(Client& client)
 		// client.rqst.print_request();
 		client.is_reading_body = false;
 		std::cout << "\nRequest Ended\n";
-		std::cout << "/Users/adbaich/Desktop/test/pp/" + client.rqst.uri << std::endl;
-		client.get.setfileName("/Users/adbaich/Desktop/test/pp/" + client.rqst.uri);
+		client.get.setfileName("///Users/aessabir/Desktop/web/lesson2/buttons.html");// + client.rqst.uri);
 		std::vector<std::string>	allowedMethods;
 
 		allowedMethods.push_back("GET");
@@ -174,6 +177,7 @@ bool	send_request(Client& client)
 		client.get.setAllowedMethods(allowedMethods);
 		client.get.initGetMethod();
 
+		// send_response(client.socket);
 		/////////////////////////////
 		std::string	responseHeader(client.get.getResponseHeaders());
 
@@ -181,6 +185,7 @@ bool	send_request(Client& client)
 		std::string	responseBody(client.get.getResponseBody());
 		bytes_sent += send(client.socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
 		/////////////////////////////
+		client.request_collector = "";
 	}
 
 

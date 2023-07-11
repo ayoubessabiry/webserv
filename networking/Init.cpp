@@ -53,15 +53,20 @@ void	Init::get_rqst(int ready_client){
 }
 
 void	Init::send_rqst(int ready_client){
-	char buff[] = "HTTP/1.1 HTTP/1.1 200 OK\nDate: Sun, 18 Oct 2012 10:36:20 GMT\nServer: Apache/2.2.14 (Win32)\nContent-Length: 88\nConnection: Closed\nContent-Type: text/html;\ncharset=iso-8859-1\n\r\n\r<html><body><h1>Hello, World!</h1></body></html>";
-	send(ready_client, buff, sizeof buff, 0);
+	int i =0;
+	while(i < clients.size() && ready_client != clients[i].socket)
+		++i;
+	std::string	responseHeader(clients[i].get.getResponseHeaders());
+	send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
+	std::string	responseBody(clients[i].get.getResponseBody());
+	send(clients[i].socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
 	FD_CLR(ready_client, &masterWrite);
-	close(ready_client);
-	// exit(1);
+	//close(ready_client);
+	// // exit(1);
 }
 
 void	Init::write_socket(int ready_client){
-	// send_rqst(ready_client);
+	send_rqst(ready_client);
 }
 
 void	Init::start_listening(){
