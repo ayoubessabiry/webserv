@@ -81,33 +81,37 @@ bool request::parse_request_data(std::string &appended_string, bool &is_reading_
 	if (!strstr(appended_string.c_str(), "\r\n\r\n") && !is_reading_body)
 		return false;
 
-	std::size_t find = appended_string.find("\r\n\r\n");
-	std::string header_half = appended_string.substr(0, find);
-
-	std::stringstream header_data(header_half);
-	std::string	line;
-	std::getline(header_data, line, '\r');
-
-	std::stringstream first_line_data(line);
-
-	std::getline(first_line_data, method, ' ');
-	std::getline(first_line_data, uri, ' ');
-
-	while (std::getline(header_data, line))
+	if (!is_reading_body)
 	{
-		std::stringstream	field_data(line);
-		std::string			value;
-		std::string 		field;
-		std::getline(field_data, field, ':');
-		std::stringstream	field_space(field);
-		std::getline(field_space, field, ' ');
-		std::getline(field_data, value, ' ');
-		std::getline(field_data, value, '\r');
-		if (field != "")
-			headers.insert(std::make_pair<std::string, std::string>(std::string(field), value));
+		std::size_t find = appended_string.find("\r\n\r\n");
+		std::string header_half = appended_string.substr(0, find);
+
+		std::stringstream header_data(header_half);
+		std::string	line;
+		std::getline(header_data, line, '\r');
+
+		std::stringstream first_line_data(line);
+
+		std::getline(first_line_data, method, ' ');
+		std::getline(first_line_data, uri, ' ');
+
+		while (std::getline(header_data, line))
+		{
+			std::stringstream	field_data(line);
+			std::string			value;
+			std::string 		field;
+			std::getline(field_data, field, ':');
+			std::stringstream	field_space(field);
+			std::getline(field_space, field, ' ');
+			std::getline(field_data, value, ' ');
+			std::getline(field_data, value, '\r');
+			if (field != "")
+				headers.insert(std::make_pair<std::string, std::string>(std::string(field), value));
+		}
+		appended_string = appended_string.substr(find, appended_string.size());
 	}
 
-	if (method != "GET" && method != "POST" && method != "DELETE")
+	if (method != "GET" && method != "POST" && method != "DELETE" && !is_reading_body)
 	{
 		std::cout << "Here error\n";
 		return true;
@@ -126,10 +130,10 @@ bool request::parse_request_data(std::string &appended_string, bool &is_reading_
 
 bool	send_request(Client& client)
 {
-	std::cout << client.buff;
-
 	bool	ended = false;
 
+	if (client.is_reading_body)
+		client.request_collector = "";	
 	client.request_collector += client.buff;
 
 	ended = client.rqst.parse_request_data(client.request_collector, client.is_reading_body);
@@ -139,7 +143,7 @@ bool	send_request(Client& client)
 		// std::cout << "here\n";
 		if (client.rqst.headers.count("Content-Length"))
 		{
-			client.rqst.body += client.buff;
+			client.rqst.body += client.request_collector;
 			int	content_length;
 			std::istringstream(client.rqst.headers["Content-Length"]) >> content_length;
 			if (client.rqst.body.size() >= content_length)
@@ -147,21 +151,14 @@ bool	send_request(Client& client)
 				ended = true;
 			}
 		}
-		// if (client.rqst.headers.count("Transfer-Encoding"))
-		{
-			// return client.rqst.body_chunked_encoding(client.buff);
-		}
 	}
 
 	if (ended)
 	{
-		GetMethod	get;
-
-
 		std::string uri = "/path/index.html";
-		get.setfileName(uri);
-		get.initGetMethod();
-		get.setBufferSize(1000);
+		// client.get.setfileName(uri);
+		// client.get.initGetMethod();
+		// client.get.setBufferSize(1000);
 
 		// std::cout << client.rqst.body << std::endl;
 		client.rqst.print_request();
