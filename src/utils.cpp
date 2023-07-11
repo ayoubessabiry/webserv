@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/header.hpp"
+#include "../headers/header.hpp"
 
 std::string ft_get_path(std::string request, std::string &method)
 {

@@ -1,4 +1,4 @@
-#include "../include/header.hpp"
+#include "../headers/header.hpp"
 static void insert_in_map(std::string line, _MAP &types_map);
 
 _MAP get_map()

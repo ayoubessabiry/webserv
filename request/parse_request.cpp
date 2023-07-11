@@ -163,7 +163,26 @@ bool	send_request(Client& client)
 		// client.rqst.print_request();
 		client.is_reading_body = false;
 		std::cout << "\nRequest Ended\n";
+		std::cout << "/Users/adbaich/Desktop/test/pp/" + client.rqst.uri << std::endl;
+		client.get.setfileName("/Users/adbaich/Desktop/test/pp/" + client.rqst.uri);
+		std::vector<std::string>	allowedMethods;
+
+		allowedMethods.push_back("GET");
+
+		client.get.setBufferSize(10000000);
+		client.get.setAutoIndex(true);
+		client.get.setAllowedMethods(allowedMethods);
+		client.get.initGetMethod();
+
+		/////////////////////////////
+		std::string	responseHeader(client.get.getResponseHeaders());
+
+		size_t bytes_sent = send(client.socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
+		std::string	responseBody(client.get.getResponseBody());
+		bytes_sent += send(client.socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
+		/////////////////////////////
 	}
+
 
 	return ended;
 }

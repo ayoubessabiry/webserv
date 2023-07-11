@@ -61,7 +61,7 @@ void	Init::send_rqst(int ready_client){
 }
 
 void	Init::write_socket(int ready_client){
-	send_rqst(ready_client);
+	// send_rqst(ready_client);
 }
 
 void	Init::start_listening(){
