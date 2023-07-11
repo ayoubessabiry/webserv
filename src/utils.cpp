@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbaich <adbaich@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/01 13:46:24 by adbaich           #+#    #+#             */
-/*   Updated: 2023/07/07 13:37:17 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/11 13:21:55 by adbaich          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,16 +78,16 @@ void string_toupper(std::string &x)
 		x[i] = toupper(x[i]);
 }
 
-void ft_error(const char *file_err, int i, _MAP types_map)
-{
+// void ft_error(const char *file_err, int i, _MAP types_map)
+// {
 
-	std::string root("/Users/adbaich/Desktop/test/errors/");
-	std::string tmp(root);
+// 	std::string root("/Users/adbaich/Desktop/test/errors/");
+// 	std::string tmp(root);
 
-	tmp.append(file_err);
-	std::string extension = get_ext(tmp);
-	// ft_get(tmp.c_str(), i, types_map, extension);
-}
+// 	tmp.append(file_err);
+// 	std::string extension = get_ext(tmp);
+// 	ft_get(tmp.c_str(), i, types_map, extension);
+// }
 
 int isDirectory(const char *path)
 {
@@ -226,18 +226,38 @@ void deleteDirectoryContent(std::string& dir)
 std::string	getRangeFromFile(const char* path, int start, size_t buffer_size)
 {
 	std::ifstream	file;
+	std::string		body;
 
 	file.open(path, std::ifstream::binary);
-	char* buffer = new char[buffer_size];
 	if (file.is_open())
 	{
+		char* buffer = new char[buffer_size];
 		if (start)
 			file.seekg(start-1);
 		file.read(buffer, buffer_size -1);
 		buffer[file.gcount()] = '\0';
+		body = buffer;
+		delete [] buffer;
 	}
 	file.close();
-	std::string	body(buffer);
-	delete [] buffer;
 	return body;
+}
+
+std::string	intToString(int	num) {
+
+	std::string string;
+
+	if (!num)
+	{
+		string.append("0");
+	}
+	while (num)
+	{
+		char c;
+		c = (num % 10) + '0';
+		string += c;
+		num = num / 10;
+	}
+	string = std::string(string.rbegin(), string.rend());
+	return string;
 }

@@ -28,13 +28,13 @@ protected:
 	/*
 	** --------------------------------- CONSTRUCTOR ----------------------------------
 	*/
-
+public:
 	MandatoryResponseHeaders();
 
 	/*
 	** --------------------------------- METHODS ----------------------------------
 	*/
-
+protected:
 	void initHttpStatusStrings();
 	void initHttpStatusFiles();
 	void startLine();			   //
@@ -52,18 +52,20 @@ protected:
 	** --------------------------------- GETTERS ----------------------------------
 	*/
 
-	std::string getResponseHeaders();
-	std::string getResponseBody();
+public:
+	const std::string getResponseHeaders();
+	const std::string getResponseBody();
 
 	/*
 	** --------------------------------- SETTERS ----------------------------------
 	*/
-	void setBytesSent(size_t b);
-	void setStatusCode(int s);
-	void setBufferSize(size_t b);
-	void setAutoIndex(bool b);
-	void setUploadDirectory(std::string& upDir);
-	void setAllowedMethods(std::vector<std::string>& a);
-	void setLocationRedirectionPath(std::string& l);
-	void setfileName(std::string& f);
+public:
+	void setBytesSent(const size_t b);
+	void setStatusCode(const int s);
+	void setBufferSize(const size_t b);
+	void setAutoIndex(const bool b);
+	void setUploadDirectory(const std::string& upDir);
+	void setAllowedMethods(const std::vector<std::string>& a);
+	void setLocationRedirectionPath(const std::string& l);
+	void setfileName(const std::string& f);
 };

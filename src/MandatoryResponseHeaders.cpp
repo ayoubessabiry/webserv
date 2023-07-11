@@ -2,16 +2,17 @@
 
 // Public
 
-MandatoryResponseHeaders::MandatoryResponseHeaders() : StatusCode(200), bytesSent(0)
+MandatoryResponseHeaders::MandatoryResponseHeaders() : bytesSent(0), autoIndex(false), StatusCode(200)
 {
     initHttpStatusStrings();
     initHttpStatusFiles();
     types_map = get_map();
 }
-void MandatoryResponseHeaders::setStatusCode(int s)
+void MandatoryResponseHeaders::setStatusCode(const int s)
 {
     StatusCode = s;
-    startLine();
+    // THINK ABOUT THIS AS IT WILL BE CALLED ANYWAY ON SetResponseHeaders
+    // startLine();
 }
 
 // Private
@@ -19,6 +20,7 @@ void MandatoryResponseHeaders::setStatusCode(int s)
 void MandatoryResponseHeaders::setResponseHeaders()
 {
     startLine();
+    responseHeaders.append(startLineString);
     if (locationRedirectionPath.empty())
     {
         calculateContentLength();
@@ -31,7 +33,6 @@ void MandatoryResponseHeaders::setResponseHeaders()
         responseHeaders.append(locationRedirectionHeader);
     }
     setDate();
-    responseHeaders.append(startLineString);
     responseHeaders.append(date);
     responseHeaders.append("\r\n");
 }
@@ -48,7 +49,7 @@ void MandatoryResponseHeaders::startLine()
     startLineString.clear();
     startLineString.append("HTTP/1.1");
     startLineString.append(" ");
-    startLineString.append(std::to_string(StatusCode));
+    startLineString.append(intToString(StatusCode));
     startLineString.append(" ");
     startLineString.append(httpStatusStrings[StatusCode]);
     startLineString.append("\r\n");
@@ -64,7 +65,7 @@ void MandatoryResponseHeaders::calculateContentLength()
     file.seekg(0, file.beg);
     file.close();
 
-    contentLength.append(std::to_string(fileLength).c_str());
+    contentLength.append(intToString(fileLength).c_str());
     contentLength.append("\r\n");
 }
 bool MandatoryResponseHeaders::canNotOpenFileForRead()
@@ -93,14 +94,7 @@ bool MandatoryResponseHeaders::canNotOpenFileForWrite()
 
     if (!file.is_open())
     {
-        if (access(fileName.c_str(), F_OK))
-        {
-            StatusCode = 404;
-        }
-        else
-        {
-            StatusCode = 403;
-        }
+        StatusCode = 403;
         setFileNameToFileError();
         return true;
     }
@@ -120,11 +114,11 @@ void MandatoryResponseHeaders::initHttpStatusStrings()
 }
 void MandatoryResponseHeaders::initHttpStatusFiles()
 {
-    httpStatusFiles[201] = "/Users/adbaich/Desktop/test/errors/201.html";
-    httpStatusFiles[400] = "/Users/adbaich/Desktop/test/errors/400.html";
-    httpStatusFiles[404] = "/Users/adbaich/Desktop/test/errors/404.html";
-    httpStatusFiles[403] = "/Users/adbaich/Desktop/test/errors/403.html";
-    httpStatusFiles[500] = "/Users/adbaich/Desktop/test/errors/500.html";
+    httpStatusFiles[201] = "./errors/201.html";
+    httpStatusFiles[400] = "./errors/400.html";
+    httpStatusFiles[404] = "./errors/404.html";
+    httpStatusFiles[403] = "./errors/403.html";
+    httpStatusFiles[500] = "./errors/500.html";
 }
 
 void MandatoryResponseHeaders::setContentType()
@@ -153,14 +147,14 @@ void MandatoryResponseHeaders::setFileNameToFileError()
     }
 }
 
-std::string MandatoryResponseHeaders::getResponseHeaders()
+const std::string MandatoryResponseHeaders::getResponseHeaders()
 {
     setResponseHeaders();
     return responseHeaders;
 }
 void MandatoryResponseHeaders::setResponseBody()
 {
-    if (autoIndex)
+    if (autoIndex && !autoIndexFile.empty())
     {
         responseBody = autoIndexFile;
     }
@@ -169,37 +163,37 @@ void MandatoryResponseHeaders::setResponseBody()
         responseBody = getRangeFromFile(fileName.c_str(), bytesSent, bufferSize);
     }
 }
-std::string MandatoryResponseHeaders::getResponseBody()
+const std::string MandatoryResponseHeaders::getResponseBody()
 {
     setResponseBody();
     return responseBody;
 }
-void MandatoryResponseHeaders::setBytesSent(size_t b)
+void MandatoryResponseHeaders::setBytesSent(const size_t b)
 {
     bytesSent = b;
 }
-void MandatoryResponseHeaders::setBufferSize(size_t b)
+void MandatoryResponseHeaders::setBufferSize(const size_t b)
 {
     bufferSize = b;
 }
-void MandatoryResponseHeaders::setAutoIndex(bool b)
+void MandatoryResponseHeaders::setAutoIndex(const bool b)
 {
     autoIndex = b;
 }
-void MandatoryResponseHeaders::setUploadDirectory(std::string &upDir)
+void MandatoryResponseHeaders::setUploadDirectory(const std::string &upDir)
 {
     uploadDirectory = upDir;
 }
-void MandatoryResponseHeaders::setAllowedMethods(std::vector<std::string> &a)
+void MandatoryResponseHeaders::setAllowedMethods(const std::vector<std::string> &a)
 {
     allowedMethods = a;
 }
-void MandatoryResponseHeaders::setLocationRedirectionPath(std::string &l)
+void MandatoryResponseHeaders::setLocationRedirectionPath(const std::string &l)
 {
     locationRedirectionPath = l;
 }
 // MandatoryResponseHeaders::
-void MandatoryResponseHeaders::setfileName(std::string &f)
+void MandatoryResponseHeaders::setfileName(const std::string &f)
 {
     fileName = f;
 }
