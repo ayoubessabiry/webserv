@@ -1,6 +1,6 @@
 #ifndef CLIENT_HPP_GARD
 # define CLIENT_HPP_GARD
-# define MAX_REQUEST_SIZE 65300
+# define MAX_REQUEST_SIZE 65000
 # include "webserv.hpp"
 # include "parse_request.hpp"
 # include "parse_config.hpp"
