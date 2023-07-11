@@ -28,6 +28,7 @@ struct location_block
 	std::string					cgi_exec;
 	std::string					cgi_path;
 	std::string					client_max_body_size;
+	std::string					auto_index;
 	std::vector<std::string>	redirect;
 	std::vector<std::string>	indexes;
 	std::vector<std::string>	methods;

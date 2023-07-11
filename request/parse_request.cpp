@@ -17,9 +17,9 @@ void request::print_request()
 	std::map<std::string, std::string>::iterator	it;
 
 	std::cout << "\e[1;33m----------Request Line----------\n";
-	// if (!method.empty())
+	if (!method.empty())
 		std::cout << "\e[1;33m Method: \e[0;33m" << method << "\n";
-	// if (!method.uri())
+	if (!uri.empty())
 	{
 		std::cout << "\e[1;33m Request Uri: \e[0;33m" << uri << "\n";
 		std::cout << "\n\n";
@@ -35,30 +35,8 @@ void request::print_request()
 	if (!body.empty())
 	{
 		std::cout << "\e[1;35m---------Body------------\e[0;35m\n";
-		std::cout << "\e[1;35m" << body.size();
+		std::cout << "\e[1;35m" << body;
 	}
-}
-
-std::string request::random_file_name_generate()
-{
-	std::string name = "/tmp/";
-
-	std::string char_list = "abcdefghijklmnopqrstuvzxyzABCDEFGHIJKLMNQRSTUVWXYZ";
-
-	srand(time(0));
-
-	name += char_list[rand() % char_list.size()];
-	name += char_list[rand() % char_list.size()];
-	name += char_list[rand() % char_list.size()];
-	name += char_list[rand() % char_list.size()];
-	name += char_list[rand() % char_list.size()];
-	name += char_list[rand() % char_list.size()];
-	name += char_list[rand() % char_list.size()];
-	name += char_list[rand() % char_list.size()];
-	name += char_list[rand() % char_list.size()];
-	name += char_list[rand() % char_list.size()];
-
-	return name;
 }
 
 size_t	convert_hex_to_decimal(std::string hex_number)
@@ -72,18 +50,19 @@ size_t	convert_hex_to_decimal(std::string hex_number)
 	return num;
 }
 
-bool request::body_chunked_encoding(std::string &body)
+bool request::body_chunked_encoding(std::string &req)
 {
 	bool				chunking_done = false;
 
-	std::string body_line;
-	std::stringstream	body_data(body);
+	std::string 		body_line;
+	std::stringstream	body_data(req);
 	std::getline(body_data, body_line, '\r');
 	size_t chunk_size = convert_hex_to_decimal(body_line);
 
 	std::string	chunk_data = "";
-	while (std::getline(body_data, body_line, '\r')) 
+	while (std::getline(body_data, body_line, '\r'))
 	{
+		std::cout << body_line;
 		chunk_data += body_line;
 		if (chunk_data.size() - 1 >= chunk_size)
 		{
@@ -98,42 +77,44 @@ bool request::body_chunked_encoding(std::string &body)
 	return chunking_done;
 }
 
-bool request::parse_request_data(std::string &req)
+bool request::parse_request_data(std::string &appended_string, bool &is_reading_body)
 {
-	bool	request_ended = false;
-
-	if (!strstr(req.c_str(), "\r\n\r\n") && !is_reading_body)
+	if (!strstr(appended_string.c_str(), "\r\n\r\n") && !is_reading_body)
 		return false;
 
-	std::size_t find = req.find("\r\n\r\n");
-
-	std::string header_half = req.substr(0, find);
-
-	std::stringstream header_data(header_half);
-	std::string	line;
-	std::getline(header_data, line, '\r');
-
-	std::stringstream first_line_data(line);
-
-	std::getline(first_line_data, method, ' ');
-	std::getline(first_line_data, uri, ' ');
-
-	while (std::getline(header_data, line))
+	if (!is_reading_body)
 	{
-		std::stringstream	field_data(line);
-		std::string			value;
-		std::string 		field;
-		std::getline(field_data, field, ':');
-		std::stringstream	field_space(field);
-		std::getline(field_space, field, ' ');
-		std::getline(field_data, value, ' ');
-		std::getline(field_data, value, '\r');
-		if (field != "")
-			headers.insert(std::make_pair<std::string, std::string>(std::string(field), value));
+		std::size_t find = appended_string.find("\r\n\r\n");
+		std::string header_half = appended_string.substr(0, find);
+
+		std::stringstream header_data(header_half);
+		std::string	line;
+		std::getline(header_data, line, '\r');
+
+		std::stringstream first_line_data(line);
+
+		std::getline(first_line_data, method, ' ');
+		std::getline(first_line_data, uri, ' ');
+
+		while (std::getline(header_data, line))
+		{
+			std::stringstream	field_data(line);
+			std::string			value;
+			std::string 		field;
+			std::getline(field_data, field, ':');
+			std::stringstream	field_space(field);
+			std::getline(field_space, field, ' ');
+			std::getline(field_data, value, ' ');
+			std::getline(field_data, value, '\r');
+			if (field != "")
+				headers.insert(std::make_pair<std::string, std::string>(std::string(field), value));
+		}
+		appended_string = appended_string.substr(find, appended_string.size());
 	}
 
-	if (method != "GET" || method != "POST" || method != "DELETE")
+	if (method != "GET" && method != "POST" && method != "DELETE" && !is_reading_body)
 	{
+		std::cout << "Here error\n";
 		return true;
 		status = "400";
 	}
@@ -143,58 +124,46 @@ bool request::parse_request_data(std::string &req)
 	if (method == "POST")
 	{
 		is_reading_body = true;
-		if (headers.count("Content-Length") >= 1)
-		{
-			std::cout << "Here" << std::endl;
-			body += req;
-			body_file << req;
-			int	content_length;
-			std::istringstream(headers["Content-Length"]) >> content_length;
-			if (body.size() == content_length)
-				return true;
-		}
-		if (headers.count("Transfer-Encoding"))
-			return body_chunked_encoding(req) ;
 	}
 
 	return false;
 }
 
-request _request;
-
 bool	send_request(Client& client)
-{ 
-	request _request;
+{
+	bool	ended = false;
 
-	_request.body_file.open(_request.random_file_name_generate());
-	_request.is_reading_body = false;
-	_request.body = "";
-	std::string		temp_string;
-	std::string buffer = std::string(client.buff);
+	if (client.is_reading_body)
+		client.request_collector = "";	
+	client.request_collector += client.buff;
 
-	if (_request.method == "POST")
-		r_http = "";
+	ended = client.rqst.parse_request_data(client.request_collector, client.is_reading_body);
 
-	r_http += std::string(client.buff);
+	if (client.is_reading_body)
+	{
+		// std::cout << "here\n";
+		if (client.rqst.headers.count("Content-Length"))
+		{
+			client.rqst.body += client.request_collector;
+			int	content_length;
+			std::istringstream(client.rqst.headers["Content-Length"]) >> content_length;
+			if (client.rqst.body.size() >= content_length)
+			{
+				ended = true;
+			}
+		}
+		if (client.rqst.headers.count("Transfer-Encoding"))
+		{
+			ended = client.rqst.body_chunked_encoding(client.request_collector);
+		}
+	}
 
-	std::cout << r_http << std::endl;
+	if (ended)
+	{
+		// client.rqst.print_request();
+		client.is_reading_body = false;
+		std::cout << "\nRequest Ended\n";
+	}
 
-	bool ended = _request.parse_request_data(r_http);
-	// if (ended)
-	// 	std::cout << "Request Ended !!" << std::endl;
-	// _request.print_request();
-
-	return false;
+	return ended;
 }
-
-// int main()
-// {
-// 	std::ofstream file;
-
-// 	request rqst;
-
-// 	// file.open(rqst.random_file_name_generate());
-// 	file.open("ttt");
-
-// 	file << "eret00000fghdtffgh";
-// }

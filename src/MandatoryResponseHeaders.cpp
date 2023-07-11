@@ -59,7 +59,7 @@ void MandatoryResponseHeaders::calculateContentLength()
     contentLength.append("Content-Length: ");
     std::ifstream file;
 
-    file.open(fileName, std::ios::binary);
+    file.open(fileName.c_str(), std::ios::binary);
     file.seekg(0, file.end);
     size_t fileLength = file.tellg();
     file.seekg(0, file.beg);
@@ -70,7 +70,7 @@ void MandatoryResponseHeaders::calculateContentLength()
 }
 bool MandatoryResponseHeaders::canNotOpenFileForRead()
 {
-    std::ifstream file(fileName);
+    std::ifstream file(fileName.c_str());
 
     if (!file.is_open())
     {
@@ -90,7 +90,7 @@ bool MandatoryResponseHeaders::canNotOpenFileForRead()
 }
 bool MandatoryResponseHeaders::canNotOpenFileForWrite()
 {
-    std::ofstream file(fileName);
+    std::ofstream file(fileName.c_str());
 
     if (!file.is_open())
     {

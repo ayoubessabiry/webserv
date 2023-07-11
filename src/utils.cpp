@@ -35,7 +35,7 @@ std::string ft_get_path(std::string request, std::string &method)
 bool ft_check_file(std::string file_name)
 {
 
-	std::ifstream file(file_name);
+	std::ifstream file(file_name.c_str());
 
 	if (!file.is_open())
 	{

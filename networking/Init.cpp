@@ -1,6 +1,5 @@
 # include "../headers/Init.hpp"
 
-
 void	Init::read_socket(int ready_client){
 	int i = -1;
 	while(++i < server.size()){
@@ -25,8 +24,14 @@ void	Init::add_client(int new_client){
 	Client	client;
 
 	new_socket = accept(new_client, (sockaddr *)&client.client_add, &client.addr_size);
+
+	// client.configuration = server_block[new_client];
+	client.is_reading_body = false;
+	client.rqst.body = "";
+	client.request_collector = "";
 	client.socket = new_socket;
 	client.recv_byte = 0;
+
 	clients.push_back(client);
 	FD_SET(new_socket, &masterRead);
 	(new_socket > max_Rsocket) ? max_Rsocket = new_socket : max_Rsocket;
@@ -34,7 +39,6 @@ void	Init::add_client(int new_client){
 
 void	Init::get_rqst(int ready_client){
 	int				i = 0;
-	// char			buff[MAX_REQUEST_SIZE + 1];
 
 	while (i < clients.size() && ready_client != clients[i].socket)
 		++i;
