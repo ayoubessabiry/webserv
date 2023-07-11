@@ -1,6 +1,5 @@
 # include "../headers/Init.hpp"
 
-
 void	Init::read_socket(int ready_client){
 	int i = -1;
 	while(++i < server.size()){
@@ -26,6 +25,7 @@ void	Init::add_client(int new_client){
 
 	new_socket = accept(new_client, (sockaddr *)&client.client_add, &client.addr_size);
 
+	// client.configuration = server_block[new_client];
 	client.is_reading_body = false;
 	client.rqst.body = "";
 	client.request_collector = "";

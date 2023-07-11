@@ -202,8 +202,7 @@ void webserver::parse_server_block(std::string config_file_data)
 					}
 					server.methods.push_back(config_tokens[i]);
 					i++;
-				}
-				
+				}				
 			}
 			if (config_tokens[i] == "error")
 			{
@@ -266,6 +265,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				}	
 			}
 		}
+		// LOCATION BLOCK
 		if (block_state == LOCATION)
 		{
 			if (config_tokens[i] == "index")
@@ -276,6 +276,19 @@ void webserver::parse_server_block(std::string config_file_data)
 					location.indexes.push_back(config_tokens[i]);
 					i++;
 				}	
+			}
+			if (config_tokens[i] == "auto_index")
+			{
+				i++;
+				std::string	auto_index = "";
+				auto_index += config_tokens[i++];
+				if (config_tokens[i] != ";")
+				{
+					std::cout << "ERROR" << std::endl;
+					parse_state = false;
+					return ;
+				}
+				location.auto_index = auto_index;
 			}
 			if (config_tokens[i] == "client_max_body_size")
 			{
@@ -322,10 +335,29 @@ void webserver::parse_server_block(std::string config_file_data)
 					return ;
 				}
 			}
+			if (config_tokens[i] == "method")
+			{
+				i++;
+				while (config_tokens[i] != ";")
+				{
+					if (!check_if_method_valid(config_tokens[i]))
+					{
+						std::cout << "ERROR" << std::endl;
+						parse_state = false;
+						return ;
+					}
+					location.methods.push_back(config_tokens[i]);
+					i++;
+				}				
+			}
 			if (config_tokens[i] == "}")
 			{
 				block_state = SERVER;
 				server.locations.push_back(location);
+				location.auto_index.clear();
+				location.client_max_body_size.clear();
+				location.indexes.clear();
+				location.methods.clear();
 			}
 		}
 	}
@@ -378,6 +410,10 @@ void	webserver::print_config_file()
 			std::cout << "\t-----Locations------\n";
 			for (size_t j = 0; j < server_blocks[i].locations.size(); j++)
 			{
+				if (!server_blocks[i].locations[j].auto_index.empty())
+					std::cout << "\tAuto Index: " << server_blocks[i].locations[j].auto_index << std::endl;
+				if (!server_blocks[i].locations[j].client_max_body_size.empty())
+					std::cout << "\tMax Body Size: " << server_blocks[i].locations[j].client_max_body_size << std::endl;
 				if (!server_blocks[i].locations[j].prefix.empty())
 					std::cout << "\tPrefix: " << server_blocks[i].locations[j].prefix << std::endl;
 				if (!server_blocks[i].locations[j].cgi_exec.empty())
@@ -390,6 +426,14 @@ void	webserver::print_config_file()
 					for (size_t k = 0; k < server_blocks[i].locations[j].indexes.size(); k++)
 					{
 						std::cout << "\t\t" << server_blocks[i].locations[j].indexes[k] << std::endl;
+					}
+				}
+				if (!server_blocks[i].locations[j].methods.empty())
+				{
+					std::cout << "\t\t-----Allowed Methods----	\n";
+					for (size_t k = 0; k < server_blocks[i].locations[j].methods.size(); k++)
+					{
+						std::cout << "\t\t" << server_blocks[i].locations[j].methods[k] << std::endl;
 					}
 				}
 			}			

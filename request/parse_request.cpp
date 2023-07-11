@@ -50,18 +50,19 @@ size_t	convert_hex_to_decimal(std::string hex_number)
 	return num;
 }
 
-bool request::body_chunked_encoding(std::string &body)
+bool request::body_chunked_encoding(std::string &req)
 {
 	bool				chunking_done = false;
 
 	std::string 		body_line;
-	std::stringstream	body_data(body);
+	std::stringstream	body_data(req);
 	std::getline(body_data, body_line, '\r');
 	size_t chunk_size = convert_hex_to_decimal(body_line);
 
 	std::string	chunk_data = "";
-	while (std::getline(body_data, body_line, '\r')) 
+	while (std::getline(body_data, body_line, '\r'))
 	{
+		std::cout << body_line;
 		chunk_data += body_line;
 		if (chunk_data.size() - 1 >= chunk_size)
 		{
@@ -151,11 +152,15 @@ bool	send_request(Client& client)
 				ended = true;
 			}
 		}
+		if (client.rqst.headers.count("Transfer-Encoding"))
+		{
+			ended = client.rqst.body_chunked_encoding(client.request_collector);
+		}
 	}
 
 	if (ended)
 	{
-		client.rqst.print_request();
+		// client.rqst.print_request();
 		client.is_reading_body = false;
 		std::cout << "\nRequest Ended\n";
 	}

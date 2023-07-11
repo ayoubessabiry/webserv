@@ -16,7 +16,6 @@ class request
 		std::string 	file_name;
 		std::map<std::string, std::string>		headers;
 
-
 		std::string	random_file_name_generate();
 		bool	parse_request_data(std::string&, bool&);
 		bool	body_chunked_encoding(std::string&);
@@ -28,7 +27,7 @@ bool	valid_method(std::string body);
 
 class Client  
 {
-public : 	
+public :
 
 	// Responses
 	GetMethod			get;
@@ -44,6 +43,7 @@ public :
 	ssize_t				body_byte;
 	char				buff[MAX_REQUEST_SIZE];
 	int					socket;
+	location_block		match_location();
 };
 
 bool	send_request(Client& client);
