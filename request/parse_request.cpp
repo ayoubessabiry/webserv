@@ -135,8 +135,6 @@ bool	send_request(Client& client)
 {
 	bool	ended = false;
 
-	std::cout << client.buff << std::endl;
-
 	if (client.is_reading_body)
 		client.request_collector = "";	
 	client.request_collector += client.buff;
@@ -167,24 +165,26 @@ bool	send_request(Client& client)
 		// client.rqst.print_request();
 		client.is_reading_body = false;
 		std::cout << "\nRequest Ended\n";
-		client.get.setfileName("///Users/aessabir/Desktop/web/lesson2/buttons.html");// + client.rqst.uri);
-		std::vector<std::string>	allowedMethods;
 
-		allowedMethods.push_back("GET");
-
-		client.get.setBufferSize(10000000);
-		client.get.setAutoIndex(true);
-		client.get.setAllowedMethods(allowedMethods);
-		client.get.initGetMethod();
-
-		// send_response(client.socket);
 		/////////////////////////////
-		std::string	responseHeader(client.get.getResponseHeaders());
+		// client.get.setfileName(client.desired_location.root + client.rqst.uri);
+		// std::vector<std::string>	allowedMethods;
 
-		size_t bytes_sent = send(client.socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
-		std::string	responseBody(client.get.getResponseBody());
-		bytes_sent += send(client.socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
-		/////////////////////////////
+		// allowedMethods.push_back("GET");
+
+
+		// client.get.setBufferSize(10000000);
+		// client.get.setAutoIndex(true);
+		// client.get.setAllowedMethods(allowedMethods);
+		// client.get.initGetMethod();
+
+		// // send_response(client.socket);
+		// std::string	responseHeader(client.get.getResponseHeaders());
+
+		// size_t bytes_sent = send(client.socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
+		// std::string	responseBody(client.get.getResponseBody());
+		// bytes_sent += send(client.socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
+		// /////////////////////////////
 		client.request_collector = "";
 	}
 

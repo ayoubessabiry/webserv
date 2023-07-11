@@ -46,6 +46,18 @@ void	Init::get_rqst(int ready_client){
 	clients[i].recv_byte += recv(ready_client, &clients[i].buff, MAX_REQUEST_SIZE, 0);
 	if(send_request(clients[i])){
 		// move ready_client to send();
+		std::string host = clients[i].rqst.headers["Host"];
+		size_t size = host.size();
+		size_t find_dot = host.find(":");
+		std::string port = host.substr(find_dot + 1, host.size());
+		for (int j = 0 ; j < server.size(); j++)
+		{
+			if (server[j]._server.port == port)
+			{
+				clients[i].configuration = server[j]._server;
+				break ;
+			}
+		}
 		FD_CLR(ready_client, &masterRead);
 		FD_SET(ready_client, &masterWrite);
 		(ready_client > max_Wsocket) ? max_Wsocket = ready_client : max_Wsocket;
@@ -56,10 +68,32 @@ void	Init::send_rqst(int ready_client){
 	int i =0;
 	while(i < clients.size() && ready_client != clients[i].socket)
 		++i;
+
+	clients[i].desired_location = clients[i].match_location();
+
+	std::cout << clients[i].desired_location.methods[0];
+	std::cout << clients[i].desired_location.root + clients[i].rqst.uri << std::endl;
+
+	clients[i].get.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
+	
+	/////////////////////////////
+	std::vector<std::string>	allowedMethods;
+
+	allowedMethods.push_back("GET");
+
+	clients[i].get.setBufferSize(10000000);
+	clients[i].get.setAutoIndex(true);
+	clients[i].get.setAllowedMethods(allowedMethods);
+	clients[i].get.initGetMethod();
+
+	// send_response(clients[i].socket);
 	std::string	responseHeader(clients[i].get.getResponseHeaders());
-	send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
+
+	size_t bytes_sent = send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
 	std::string	responseBody(clients[i].get.getResponseBody());
-	send(clients[i].socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
+	bytes_sent += send(clients[i].socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
+
+	/////////////////////////////
 	FD_CLR(ready_client, &masterWrite);
 	//close(ready_client);
 	// // exit(1);

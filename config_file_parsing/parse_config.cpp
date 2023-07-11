@@ -350,6 +350,19 @@ void webserver::parse_server_block(std::string config_file_data)
 					i++;
 				}				
 			}
+			if (config_tokens[i] == "root")
+			{
+				i++;
+				std::string	root = "";
+				root += config_tokens[i++];
+				if (config_tokens[i] != ";")
+				{
+					std::cout << "ERROR" << std::endl;
+					parse_state = false;
+					return ;
+				}
+				location.root = root;
+			}
 			if (config_tokens[i] == "}")
 			{
 				block_state = SERVER;

@@ -1,16 +1,22 @@
 #ifndef SERVER_HPP_GARD
 # define SERVER_HPP_GARD
 # include "webserv.hpp"
+# include "parse_config.hpp"
 
 class Server  
 {
 public :
 	std::string			_server_name;
+	server_block		_server;
 	int					_socket;
 	const char*			_port;
 	const char*			_host;
 
-	Server(const char* port, const char* host, std::string server_name) : _port(port), _host(host), _server_name(server_name){}
+	Server(server_block server) : _server(server),
+								 _port(server.port.c_str()),
+								 _host(server.host.c_str()),
+								 _server_name(server.server_name.c_str()){
+	}
 	void	create_socket();
 };
 

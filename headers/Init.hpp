@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Init.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: smounir <smounir@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 10:17:07 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/09 14:29:15 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/11 18:02:15 by smounir          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define INIT_HPP_GARD
 # include "Server.hpp"
 # include "parse_request.hpp"
+# include "parse_config.hpp"
 
 /*
 

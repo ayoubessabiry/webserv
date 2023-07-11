@@ -38,6 +38,7 @@ public :
 	bool				is_reading_body;
 	request				rqst;
 	server_block		configuration;
+	location_block		desired_location;
 	ssize_t				recv_byte;
 	ssize_t				header_byte;
 	ssize_t				body_byte;
