@@ -33,7 +33,6 @@
 #define GETSOCKETERRNO() (errno)
 typedef std::map<std::string, std::string> _MAP;
 void ft_get(const char *file_name, SOCKET &socket_client, _MAP types_map, std::string &ext);
-void insert_in_map(std::string line, _MAP &types_map);
 bool ft_check_file(std::string file_name);
 std::string get_ext(std::string &file_path);
 std::string ft_get_path(std::string request, std::string &method);
@@ -52,6 +51,6 @@ bool pathDoesNotExist(const char *path);
 bool canNotOpenDirectoryOrSubDirectories(const char *dir);
 void deleteDirectoryContent(std::string& dir);
 std::string	getRangeFromFile(const char* path, int start, size_t buffer_size);
+std::string	intToString(int	num);
 
 _MAP get_map();
-void insert_in_map(std::string line, _MAP &types_map);

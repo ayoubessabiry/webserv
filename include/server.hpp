@@ -8,7 +8,7 @@ class server
 	SOCKET socket_listen;
 	std::string		method;
 	int i;
-	bool	forbidden;
+
     _MAP types_map;
 
 	void local_add_conf(char **av);

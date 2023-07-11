@@ -1,4 +1,5 @@
 #include "../include/header.hpp"
+static void insert_in_map(std::string line, _MAP &types_map);
 
 _MAP get_map()
 {
@@ -136,5 +137,5 @@ std::string	getContentTypeOfExt(_MAP& types_map, std::string &ext)
 
 	if (it != types_map.end())
 		return it->second;
-	return types_map.find("txt")->second;
+	return types_map.find("html")->second;
 }

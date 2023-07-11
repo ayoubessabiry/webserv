@@ -10,13 +10,14 @@ class GetMethod : public MandatoryResponseHeaders
     ** --------------------------------- CONSTRUCTOR ----------------------------------
     */
 
+public:
     GetMethod();
 
     /*
     ** --------------------------------- METHODS ----------------------------------
     */
-
     void initGetMethod();
+private:
     void setInvalidResource();
     void DirectoryResponse();
 };

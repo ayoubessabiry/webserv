@@ -2,7 +2,7 @@
 
 // Public
 
-MandatoryResponseHeaders::MandatoryResponseHeaders() : StatusCode(200), bytesSent(0)
+MandatoryResponseHeaders::MandatoryResponseHeaders() : bytesSent(0), autoIndex(false), StatusCode(200)
 {
     initHttpStatusStrings();
     initHttpStatusFiles();
@@ -147,7 +147,7 @@ void MandatoryResponseHeaders::setFileNameToFileError()
     }
 }
 
-const std::string& MandatoryResponseHeaders::getResponseHeaders()
+const std::string MandatoryResponseHeaders::getResponseHeaders()
 {
     setResponseHeaders();
     return responseHeaders;
@@ -163,7 +163,7 @@ void MandatoryResponseHeaders::setResponseBody()
         responseBody = getRangeFromFile(fileName.c_str(), bytesSent, bufferSize);
     }
 }
-const std::string& MandatoryResponseHeaders::getResponseBody()
+const std::string MandatoryResponseHeaders::getResponseBody()
 {
     setResponseBody();
     return responseBody;
