@@ -26,6 +26,8 @@ void	Init::add_client(int new_client){
 	new_socket = accept(new_client, (sockaddr *)&client.client_add, &client.addr_size);
 
 	// client.configuration = server_block[new_client];
+	client.rqst.is_reading_chunked = false;
+	client.body_file_opened = false;
 	client.is_reading_body = false;
 	client.rqst.body = "";
 	client.request_collector = "";
@@ -71,8 +73,8 @@ void	Init::send_rqst(int ready_client){
 
 	clients[i].desired_location = clients[i].match_location();
 
-	std::cout << clients[i].desired_location.methods[0];
-	std::cout << clients[i].desired_location.root + clients[i].rqst.uri << std::endl;
+	// std::cout << clients[i].desired_location.methods[0];
+	// std::cout << clients[i].desired_location.root + clients[i].rqst.uri << std::endl;
 
 	clients[i].get.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
 	

@@ -39,6 +39,22 @@ void request::print_request()
 	}
 }
 
+std::string	random_file_name()
+{
+	std::string alphas = "abcdefghijklmnopqrstuvwxyz123456789";
+	std::string	file_name = "";
+
+	srand(time(0));
+
+	file_name += alphas[rand() % alphas.size()];
+	file_name += alphas[rand() % alphas.size()];
+	file_name += alphas[rand() % alphas.size()];
+	file_name += alphas[rand() % alphas.size()];
+	file_name += alphas[rand() % alphas.size()];
+
+	return file_name;
+}
+
 size_t	convert_hex_to_decimal(std::string hex_number)
 {
 	int					num;
@@ -54,24 +70,14 @@ bool request::body_chunked_encoding(std::string &req)
 {
 	bool				chunking_done = false;
 
-	std::string 		body_line;
-	std::stringstream	body_data(req);
-	std::getline(body_data, body_line, '\r');
-	size_t chunk_size = convert_hex_to_decimal(body_line);
+	std::size_t find = req.find("\r\n");
+	std::string	hex_num = req.substr(0, find);
 
-	std::string	chunk_data = "";
-	while (std::getline(body_data, body_line, '\r'))
+	size_t	chunk_size = convert_hex_to_decimal(hex_num);
+
+	while (chunk_size)
 	{
-		std::cout << body_line;
-		chunk_data += body_line;
-		if (chunk_data.size() - 1 >= chunk_size)
-		{
-			body += chunk_data;
-			chunk_data = "";
-			std::getline(body_data, body_line, '\r');
-			chunk_size = convert_hex_to_decimal(body_line);
-		}
-		chunking_done = (chunk_size == 0);
+		
 	}
 
 	return chunking_done;
@@ -112,8 +118,6 @@ bool request::parse_request_data(std::string &appended_string, bool &is_reading_
 		appended_string = appended_string.substr(find, appended_string.size());
 	}
 
-	// std::cout << method << "\n";
-
 	if (method != "GET" && method != "POST" && method != "DELETE" && !is_reading_body)
 	{
 		std::cout << "Here error\n";
@@ -136,14 +140,29 @@ bool	send_request(Client& client)
 	bool	ended = false;
 
 	if (client.is_reading_body)
-		client.request_collector = "";	
+		client.request_collector = "";
 	client.request_collector += client.buff;
 
 	ended = client.rqst.parse_request_data(client.request_collector, client.is_reading_body);
 
+	if (!client.body_file_opened)
+	{
+		client.rqst.file_name = random_file_name();
+		client.body_file_opened = true;
+	}
+	std::fstream	body_file;
+
+	body_file.open(client.rqst.file_name, std::ios_base::binary|std::ios_base::out|std::ios_base::app);
+	
+	body_file << client.buff;
 	if (client.is_reading_body)
 	{
-		// std::cout << "here\n";
+		std::fstream	body_file;
+
+		body_file.open(random_file_name().c_str(), std::ios_base::binary|std::ios_base::out);
+	
+		body_file << client.buff;
+		
 		if (client.rqst.headers.count("Content-Length"))
 		{
 			client.rqst.body += client.request_collector;
@@ -162,32 +181,12 @@ bool	send_request(Client& client)
 
 	if (ended)
 	{
-		// client.rqst.print_request();
+		client.rqst.print_request();
 		client.is_reading_body = false;
 		std::cout << "\nRequest Ended\n";
 
-		/////////////////////////////
-		// client.get.setfileName(client.desired_location.root + client.rqst.uri);
-		// std::vector<std::string>	allowedMethods;
-
-		// allowedMethods.push_back("GET");
-
-
-		// client.get.setBufferSize(10000000);
-		// client.get.setAutoIndex(true);
-		// client.get.setAllowedMethods(allowedMethods);
-		// client.get.initGetMethod();
-
-		// // send_response(client.socket);
-		// std::string	responseHeader(client.get.getResponseHeaders());
-
-		// size_t bytes_sent = send(client.socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
-		// std::string	responseBody(client.get.getResponseBody());
-		// bytes_sent += send(client.socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
-		// /////////////////////////////
 		client.request_collector = "";
 	}
-
 
 	return ended;
 }

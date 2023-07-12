@@ -1,6 +1,6 @@
 #ifndef CLIENT_HPP_GARD
 # define CLIENT_HPP_GARD
-# define MAX_REQUEST_SIZE 65000
+# define MAX_REQUEST_SIZE 2
 # include "webserv.hpp"
 # include "parse_request.hpp"
 # include "parse_config.hpp"
@@ -15,6 +15,8 @@ class request
 		std::string		status;
 		std::string 	file_name;
 		std::map<std::string, std::string>		headers;
+
+		bool			is_reading_chunked;
 
 		std::string	random_file_name_generate();
 		bool	parse_request_data(std::string&, bool&);
@@ -36,6 +38,7 @@ public :
 	sockaddr_storage	client_add;
 	std::string			request_collector;
 	bool				is_reading_body;
+	bool				body_file_opened;
 	request				rqst;
 	server_block		configuration;
 	location_block		desired_location;
