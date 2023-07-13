@@ -51,11 +51,11 @@ public :
 	ssize_t				recv_byte;
 	ssize_t				header_byte;
 	ssize_t				body_byte;
-	char				buff[MAX_REQUEST_SIZE];
+	char				buffer[MAX_REQUEST_SIZE];
 	int					socket;
 	location_block		match_location();
 };
 
-bool	send_request(Client& client);
+bool	send_request(Client& client, std::string& buff);
 
 #endif
