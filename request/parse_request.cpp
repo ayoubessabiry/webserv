@@ -55,7 +55,7 @@ std::string	random_file_name()
 	return file_name;
 }
 
-size_t	convert_hex_to_decimal(std::string hex_number)
+int	convert_hex_to_decimal(std::string hex_number)
 {
 	int					num;
 	std::stringstream	ss;
@@ -68,19 +68,43 @@ size_t	convert_hex_to_decimal(std::string hex_number)
 
 bool request::body_chunked_encoding(std::string &req)
 {
-	bool				chunking_done = false;
 
-	std::size_t find = req.find("\r\n");
-	std::string	hex_num = req.substr(0, find);
-
-	size_t	chunk_size = convert_hex_to_decimal(hex_num);
-
-	while (chunk_size)
+	// Search for first hexa
+	if (!found_next_hexa)
 	{
-		
+		if (!strstr(req.c_str(), "\r\n"))
+			return false;
+		std::size_t find = req.find("\r\n");
+		next_hex_saver += req.substr(0, find);
+		found_next_hexa = true;
+		chunk_size = convert_hex_to_decimal(next_hex_saver);
+		chunk_saver = req.substr(find + 2, req.size());
+	}
+	// Proceed to find other hexas to convert
+	if (found_next_hexa)
+	{
+		if (chunk_size == 0)
+		{
+			found_next_hexa = false;
+			return true ;
+		}
+		chunk_saver += req;
+		if (chunk_saver.size() > chunk_size)
+		{
+			std::string chunk = chunk_saver;
+			next_hex_saver = chunk.substr(chunk_size, chunk_saver.size());
+			chunk_saver = chunk.substr(0, chunk_size);
+		}
+		found_next_hexa = !(chunk_saver.size() >= chunk_size);
+
+		std::fstream	body_file;
+		body_file.open(file_name.c_str(), 
+						std::ios_base::binary|std::ios_base::out|
+						std::ios_base::app);
+		body_file << chunk_saver;
 	}
 
-	return chunking_done;
+	return false;
 }
 
 bool request::parse_request_data(std::string &appended_string, bool &is_reading_body)
@@ -153,7 +177,7 @@ bool	send_request(Client& client, std::string& buff)
 		}
 		std::fstream	body_file;
 
-		body_file.open(client.rqst.file_name, std::ios_base::binary|std::ios_base::out|std::ios_base::app);
+		body_file.open(client.rqst.file_name.c_str(), std::ios_base::binary|std::ios_base::out|std::ios_base::app);
 	
 		
 		if (client.rqst.headers.count("Content-Length"))

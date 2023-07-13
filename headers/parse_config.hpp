@@ -31,6 +31,7 @@ struct location_block
 	std::string					auto_index;
 	std::vector<std::string>	redirect;
 	std::vector<std::string>	indexes;
+	std::vector<std::string>	errors;
 	std::vector<std::string>	methods;
 };
 
@@ -38,13 +39,7 @@ struct server_block
 {
 	std::string					host;
 	std::string					server_name;
-	std::string					root;
-	std::string					auto_index;
-	std::string					access_log;
 	std::string					port;
-	std::vector<std::string>	indexes;
-	std::vector<std::string>	errors;
-	std::vector<std::string>	methods;
 	std::vector<location_block>	locations;
 };
 
