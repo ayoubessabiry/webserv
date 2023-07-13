@@ -90,15 +90,14 @@ void	Init::send_rqst(int ready_client){
 
 	// send_response(clients[i].socket);
 	std::string	responseHeader(clients[i].get.getResponseHeaders());
-
-	size_t bytes_sent = send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
+	send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
+	size_t bytes_sent = 0;
 	std::string	responseBody(clients[i].get.getResponseBody());
-	bytes_sent += send(clients[i].socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
-
+	bytes_sent = send(clients[i].socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
 	/////////////////////////////
-	FD_CLR(ready_client, &masterWrite);
-	//close(ready_client);
-	// // exit(1);
+	FD_CLR(clients[i].socket, &masterWrite);
+	close(clients[i].socket);
+	clients.erase(clients.begin()+i);
 }
 
 void	Init::write_socket(int ready_client){

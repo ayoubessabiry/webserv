@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbaich <adbaich@student.42.fr>            +#+  +:+       +#+        */
+/*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/01 13:46:24 by adbaich           #+#    #+#             */
-/*   Updated: 2023/07/11 13:21:55 by adbaich          ###   ########.fr       */
+/*   Updated: 2023/07/13 10:02:36 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -229,6 +229,7 @@ std::string	getRangeFromFile(const char* path, int start, size_t buffer_size)
 	std::string		body;
 
 	file.open(path, std::ifstream::binary);
+	std::cout << sizeof file << std::endl;
 	if (file.is_open())
 	{
 		char* buffer = new char[buffer_size];

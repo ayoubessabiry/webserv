@@ -142,24 +142,18 @@ bool	send_request(Client& client)
 	if (client.is_reading_body)
 		client.request_collector = "";
 	client.request_collector += client.buff;
-
 	ended = client.rqst.parse_request_data(client.request_collector, client.is_reading_body);
 
-	if (!client.body_file_opened)
-	{
-		client.rqst.file_name = random_file_name();
-		client.body_file_opened = true;
-	}
-	std::fstream	body_file;
-
-	body_file.open(client.rqst.file_name, std::ios_base::binary|std::ios_base::out|std::ios_base::app);
-	
-	body_file << client.buff;
 	if (client.is_reading_body)
 	{
+		if (!client.body_file_opened)
+		{
+			client.rqst.file_name = random_file_name();
+			client.body_file_opened = true;
+		}
 		std::fstream	body_file;
 
-		body_file.open(random_file_name().c_str(), std::ios_base::binary|std::ios_base::out);
+		body_file.open(client.rqst.file_name, std::ios_base::binary|std::ios_base::out|std::ios_base::app);
 	
 		body_file << client.buff;
 		
