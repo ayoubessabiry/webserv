@@ -115,7 +115,7 @@ bool request::parse_request_data(std::string &appended_string, bool &is_reading_
 			if (field != "")
 				headers.insert(std::make_pair<std::string, std::string>(std::string(field), value));
 		}
-		appended_string = appended_string.substr(find, appended_string.size());
+		appended_string = appended_string.substr(find + 4, appended_string.size());
 	}
 
 	if (method != "GET" && method != "POST" && method != "DELETE" && !is_reading_body)
@@ -135,13 +135,13 @@ bool request::parse_request_data(std::string &appended_string, bool &is_reading_
 	return false;
 }
 
-bool	send_request(Client& client)
+bool	send_request(Client& client, std::string& buff)
 {
 	bool	ended = false;
 
 	if (client.is_reading_body)
 		client.request_collector = "";
-	client.request_collector += client.buff;
+	client.request_collector += buff;
 	ended = client.rqst.parse_request_data(client.request_collector, client.is_reading_body);
 
 	if (client.is_reading_body)
@@ -155,15 +155,15 @@ bool	send_request(Client& client)
 
 		body_file.open(client.rqst.file_name, std::ios_base::binary|std::ios_base::out|std::ios_base::app);
 	
-		body_file << client.buff;
 		
 		if (client.rqst.headers.count("Content-Length"))
 		{
-			client.rqst.body += client.request_collector;
+			body_file << client.request_collector;
 			int	content_length;
 			std::istringstream(client.rqst.headers["Content-Length"]) >> content_length;
 			if (client.rqst.body.size() >= content_length)
 			{
+				std::cout << content_length << " wana 3ndi " << client.rqst.body.size() << std::endl;
 				ended = true;
 			}
 		}
@@ -175,9 +175,9 @@ bool	send_request(Client& client)
 
 	if (ended)
 	{
-		client.rqst.print_request();
+		//client.rqst.print_request();
 		client.is_reading_body = false;
-		std::cout << "\nRequest Ended\n";
+		//std::cout << "\nRequest Ended\n";
 
 		client.request_collector = "";
 	}

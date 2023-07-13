@@ -41,12 +41,15 @@ void	Init::add_client(int new_client){
 
 void	Init::get_rqst(int ready_client){
 	int				i = 0;
+	int				recB = 0;
 
 	while (i < clients.size() && ready_client != clients[i].socket)
 		++i;
-	memset(&clients[i].buff, 0, MAX_REQUEST_SIZE);
-	clients[i].recv_byte += recv(ready_client, &clients[i].buff, MAX_REQUEST_SIZE, 0);
-	if(send_request(clients[i])){
+	memset(&clients[i].buffer, 0, MAX_REQUEST_SIZE);
+	recB = recv(ready_client, &clients[i].buffer, MAX_REQUEST_SIZE, 0);
+	clients[i].recv_byte += recB;
+	std::string	buff(clients[i].buffer, recB);
+	if(send_request(clients[i], buff)){
 		// move ready_client to send();
 		std::string host = clients[i].rqst.headers["Host"];
 		size_t size = host.size();
