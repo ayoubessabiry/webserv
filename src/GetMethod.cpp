@@ -41,6 +41,12 @@ GetMethod::GetMethod()
 
 void GetMethod::initGetMethod()
 {
+    if (!methodIsAllowed("GET", allowedMethods))
+    {
+        StatusCode = 405;
+        setFileNameToFileError();
+    }
+    else
     {
         setInvalidResource();
         if (!invalidResource)

@@ -56,14 +56,22 @@ void MandatoryResponseHeaders::startLine()
 }
 void MandatoryResponseHeaders::calculateContentLength()
 {
+    size_t fileLength;
     contentLength.append("Content-Length: ");
     std::ifstream file;
 
-    file.open(fileName.c_str(), std::ios::binary);
-    file.seekg(0, file.end);
-    size_t fileLength = file.tellg();
-    file.seekg(0, file.beg);
-    file.close();
+    if (autoIndexFile.empty())
+    {
+        file.open(fileName.c_str(), std::ios::binary);
+        file.seekg(0, file.end);
+        fileLength = file.tellg();
+        file.seekg(0, file.beg);
+        file.close();
+    }
+    else
+    {
+        fileLength = autoIndexFile.size();
+    }
 
     contentLength.append(intToString(fileLength).c_str());
     contentLength.append("\r\n");
@@ -116,6 +124,8 @@ void MandatoryResponseHeaders::initHttpStatusFiles()
 {
     httpStatusFiles[201] = "./errors/201.html";
     httpStatusFiles[400] = "./errors/400.html";
+    httpStatusFiles[405] = "./errors/405.html";
+    httpStatusFiles[409] = "./errors/409.html";
     httpStatusFiles[404] = "./errors/404.html";
     httpStatusFiles[403] = "./errors/403.html";
     httpStatusFiles[500] = "./errors/500.html";
@@ -156,7 +166,7 @@ void MandatoryResponseHeaders::setResponseBody()
 {
     if (autoIndex && !autoIndexFile.empty())
     {
-        responseBody = autoIndexFile;
+        responseBody = const_cast<char *>(autoIndexFile.c_str());
         autoIndexFile.clear();
     }
     else
@@ -164,7 +174,7 @@ void MandatoryResponseHeaders::setResponseBody()
         responseBody = getRangeFromFile(fileName.c_str(), bytesSent, bufferSize);
     }
 }
-const std::string MandatoryResponseHeaders::getResponseBody()
+std::string MandatoryResponseHeaders::getResponseBody()
 {
     setResponseBody();
     return responseBody;
