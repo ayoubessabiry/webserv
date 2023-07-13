@@ -86,32 +86,33 @@ void	Init::send_response(int ready_client){
 	/////////////////////////////
 	clients[i].get.setBufferSize(MAX_REQUEST_SIZE);
 	bool	auto_index;
-	if (client[i].desired_location.auto_index == "on")
+	if (clients[i].desired_location.auto_index == "on")
 		auto_index = true;
-	if (client[i].desired_location.auto_index == "off")
+	if (clients[i].desired_location.auto_index == "off")
 		auto_index = false;
-	clients[i].get.setAutoIndex(client[i].desired_location.auto_index);
-	clients[i].get.setIndexes(auto_index);
+	clients[i].get.setAutoIndex(auto_index);
+	clients[i].get.setIndexes(clients[i].desired_location.indexes);
 	clients[i].get.setAllowedMethods(clients[i].desired_location.methods);
-	clients[i].get.setfileName(clients[i].rqst.file_name);
+	// clients[i].get.setfileName(clients[i].rqst.file_name);
 	clients[i].get.initGetMethod();
 
 	std::string	responseHeader(clients[i].get.getResponseHeaders());
 	send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
 	size_t bytes_sent = 0;
+	std::string	responseBody;
 	while (1)
 	{
-		std::string	responseBody(clients[i].get.getResponseBody());
+		responseBody = clients[i].get.getResponseBody();
 		if (responseBody.empty()){
 			break ;
 		}
-		bytes_sent += send(clients[i].socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
-		std::cout << bytes_sent  << std::endl;
+		bytes_sent += send(clients[i].socket, responseBody.c_str(), responseBody.size(), 0);
 		clients[i].get.setBytesSent(bytes_sent);
 	}
 	/////////////////////////////
 	FD_CLR(clients[i].socket, &masterWrite);
 	close(clients[i].socket);
+	std::cout << "done" << std::endl;
 	clients.erase(clients.begin()+i);
 }
 

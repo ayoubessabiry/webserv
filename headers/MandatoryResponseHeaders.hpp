@@ -54,7 +54,7 @@ protected:
 
 public:
 	const std::string getResponseHeaders();
-	const std::string getResponseBody();
+	std::string getResponseBody();
 
 	/*
 	** --------------------------------- SETTERS ----------------------------------
