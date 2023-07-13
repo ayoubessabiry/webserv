@@ -26,9 +26,11 @@ void	Init::add_client(int new_client){
 	new_socket = accept(new_client, (sockaddr *)&client.client_add, &client.addr_size);
 
 	// client.configuration = server_block[new_client];
+	client.rqst.found_next_hexa = false;
 	client.rqst.is_reading_chunked = false;
 	client.body_file_opened = false;
 	client.is_reading_body = false;
+	client.rqst.next_hex_saver = "";
 	client.rqst.body = "";
 	client.request_collector = "";
 	client.socket = new_socket;

@@ -69,39 +69,44 @@ int	convert_hex_to_decimal(std::string hex_number)
 bool request::body_chunked_encoding(std::string &req)
 {
 
-	// Search for first hexa
-	if (!found_next_hexa)
+	while(1)
 	{
-		if (!strstr(req.c_str(), "\r\n"))
-			return false;
-		std::size_t find = req.find("\r\n");
-		next_hex_saver += req.substr(0, find);
-		found_next_hexa = true;
-		chunk_size = convert_hex_to_decimal(next_hex_saver);
-		chunk_saver = req.substr(find + 2, req.size());
-	}
-	// Proceed to find other hexas to convert
-	if (found_next_hexa)
-	{
-		if (chunk_size == 0)
+		// Search for first hexa
+		if (!found_next_hexa)
 		{
-			found_next_hexa = false;
-			return true ;
+			if (!strstr(req.c_str(), "\r\n"))
+				return false;
+			std::size_t find = req.find("\r\n");
+			next_hex_saver += req.substr(0, find);
+			found_next_hexa = true;
+			chunk_size = convert_hex_to_decimal(next_hex_saver);
+			chunk_saver = req.substr(find + 2, req.size());
 		}
-		chunk_saver += req;
-		if (chunk_saver.size() > chunk_size)
+		// Proceed to find other hexas to convert
+		if (found_next_hexa)
 		{
-			std::string chunk = chunk_saver;
-			next_hex_saver = chunk.substr(chunk_size, chunk_saver.size());
-			chunk_saver = chunk.substr(0, chunk_size);
-		}
-		found_next_hexa = !(chunk_saver.size() >= chunk_size);
+			if (chunk_size == 0)
+			{
+				found_next_hexa = false;
+				return true ;
+			}
+			chunk_saver += req;
+			if (chunk_saver.size() > chunk_size)
+			{
+				std::string chunk = chunk_saver;
+				next_hex_saver = chunk.substr(chunk_size, chunk_saver.size());
+				chunk_saver = chunk.substr(0, chunk_size);
+			}
+			found_next_hexa = !(chunk_saver.size() >= chunk_size);
 
-		std::fstream	body_file;
-		body_file.open(file_name.c_str(), 
-						std::ios_base::binary|std::ios_base::out|
-						std::ios_base::app);
-		body_file << chunk_saver;
+			std::fstream	body_file;
+			body_file.open(file_name.c_str(), 
+							std::ios_base::binary|std::ios_base::out|
+							std::ios_base::app);
+			body_file << chunk_saver;
+			if (chunk_saver.size() == 1)
+				break ;
+		}
 	}
 
 	return false;
