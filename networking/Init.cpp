@@ -84,17 +84,18 @@ void	Init::send_response(int ready_client){
 	clients[i].get.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
 	
 	/////////////////////////////
-	std::vector<std::string>	allowedMethods;
-
-	allowedMethods.push_back("GET");
-
 	clients[i].get.setBufferSize(MAX_REQUEST_SIZE);
-	clients[i].get.setAutoIndex(true);
-	clients[i].get.setIndexes(clients[i].desired_location.indexes);
-	clients[i].get.setAllowedMethods(allowedMethods);
+	bool	auto_index;
+	if (client[i].desired_location.auto_index == "on")
+		auto_index = true;
+	if (client[i].desired_location.auto_index == "off")
+		auto_index = false;
+	clients[i].get.setAutoIndex(client[i].desired_location.auto_index);
+	clients[i].get.setIndexes(auto_index);
+	clients[i].get.setAllowedMethods(clients[i].desired_location.methods);
+	clients[i].get.setfileName(clients[i].rqst.file_name);
 	clients[i].get.initGetMethod();
 
-	// send_response(clients[i].socket);
 	std::string	responseHeader(clients[i].get.getResponseHeaders());
 	send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
 	size_t bytes_sent = 0;
