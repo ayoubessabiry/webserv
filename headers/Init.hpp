@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Init.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smounir <smounir@student.42.fr>            +#+  +:+       +#+        */
+/*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 10:17:07 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/11 18:02:15 by smounir          ###   ########.fr       */
+/*   Updated: 2023/07/13 15:05:14 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,14 +54,13 @@ public:
 		FD_SET(s._socket, &masterRead);
 		(s._socket > max_Rsocket) ? max_Rsocket = s._socket : max_Rsocket;
 	}
-	void	send_response(Client&);
 	void	start_listening();
 	void	read_socket(int ready_client);
 	void	write_socket(int ready_client);
 	int		wait_clients(fd_set ready, int max_sock);
 	void	add_client(int new_client);
 	void	get_rqst(int ready_client);
-	void	send_rqst(int ready_client);
+	void	send_response(int ready_client);
 
 };
 

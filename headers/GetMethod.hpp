@@ -13,7 +13,10 @@ class GetMethod : public MandatoryResponseHeaders
 
 public:
     GetMethod();
-
+    void setIndexes( std::vector<std::string> indexes)
+    {
+        this->indexes = indexes;
+    }
     /*
     ** --------------------------------- METHODS ----------------------------------
     */

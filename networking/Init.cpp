@@ -71,7 +71,7 @@ void	Init::get_rqst(int ready_client){
 	}
 }
 
-void	Init::send_rqst(int ready_client){
+void	Init::send_response(int ready_client){
 	int i =0;
 	while(i < clients.size() && ready_client != clients[i].socket)
 		++i;
@@ -88,8 +88,9 @@ void	Init::send_rqst(int ready_client){
 
 	allowedMethods.push_back("GET");
 
-	clients[i].get.setBufferSize(10000000);
+	clients[i].get.setBufferSize(MAX_REQUEST_SIZE);
 	clients[i].get.setAutoIndex(true);
+	clients[i].get.setIndexes(clients[i].desired_location.indexes);
 	clients[i].get.setAllowedMethods(allowedMethods);
 	clients[i].get.initGetMethod();
 
@@ -97,8 +98,16 @@ void	Init::send_rqst(int ready_client){
 	std::string	responseHeader(clients[i].get.getResponseHeaders());
 	send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
 	size_t bytes_sent = 0;
-	std::string	responseBody(clients[i].get.getResponseBody());
-	bytes_sent = send(clients[i].socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
+	while (1)
+	{
+		std::string	responseBody(clients[i].get.getResponseBody());
+		if (responseBody.empty()){
+			break ;
+		}
+		bytes_sent += send(clients[i].socket, responseBody.c_str(), strlen(responseBody.c_str()), 0);
+		std::cout << bytes_sent  << std::endl;
+		clients[i].get.setBytesSent(bytes_sent);
+	}
 	/////////////////////////////
 	FD_CLR(clients[i].socket, &masterWrite);
 	close(clients[i].socket);
@@ -106,7 +115,7 @@ void	Init::send_rqst(int ready_client){
 }
 
 void	Init::write_socket(int ready_client){
-	send_rqst(ready_client);
+	send_response(ready_client);
 }
 
 void	Init::start_listening(){

@@ -157,6 +157,7 @@ void MandatoryResponseHeaders::setResponseBody()
     if (autoIndex && !autoIndexFile.empty())
     {
         responseBody = autoIndexFile;
+        autoIndexFile.clear();
     }
     else
     {
