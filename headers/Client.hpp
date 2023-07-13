@@ -9,14 +9,19 @@
 class request
 {
 	public:
-		std::string		method;
-		std::string		uri;
-		std::string		body;
-		std::string		status;
-		std::string 	file_name;
+		std::string								method;
+		std::string								uri;
+		std::string								body;
+		std::string								status;
+		std::string 							file_name;
+		std::string								chunk_saver;
+		std::string								next_hex_saver;
 		std::map<std::string, std::string>		headers;
 
+		int										chunk_size;
+
 		bool			is_reading_chunked;
+		bool			found_next_hexa;
 
 		std::string	random_file_name_generate();
 		bool	parse_request_data(std::string&, bool&);
@@ -26,13 +31,14 @@ class request
 
 bool	valid_method(std::string body);
 
-
 class Client  
 {
 public :
 
 	// Responses
 	GetMethod			get;
+	// PostMethod			post;
+	// DeleteMethod		delete_method;
 
 	socklen_t			addr_size;
 	sockaddr_storage	client_add;

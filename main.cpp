@@ -23,4 +23,29 @@ int	main(int ac, char **av)
 		websrv.add_server(s);
 	}
 	websrv.start_listening();
+
+	// Client client;
+
+	// std::string	chunked_body =  
+	// "C\r\n"
+	// "Some data..."
+	// "11\r\n"
+	// "Some more data..."
+	// "0\r\n";
+
+	// int tmp_start = 0;
+
+	// for (int i = 0 ; ; i += MAX_REQUEST_SIZE)
+	// {
+	// 	if (i >= chunked_body.size())
+	// 	{
+	// 		i = chunked_body.size();
+	// 	}
+	// 	client.buff = (char*)chunked_body.substr(tmp_start, i).c_str();
+	// 	send_request(client);
+	// 	tmp_start = i;
+	// }
 }
+
+
+

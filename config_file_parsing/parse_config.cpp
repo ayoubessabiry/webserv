@@ -109,13 +109,8 @@ void webserver::parse_server_block(std::string config_file_data)
 		if (block_state == 0)
 		{
 			server.host.clear();
-			server.root.clear();
 			server.server_name.clear();
-			server.auto_index.clear();
 			server.port.clear();
-			server.methods.clear();
-			server.errors.clear();
-			server.indexes.clear();
 			server.locations.clear();
 			if (config_tokens[i] == "server" && config_tokens[i + 1] == "{")
 			{
@@ -189,55 +184,6 @@ void webserver::parse_server_block(std::string config_file_data)
 				
 				server.server_name = server_name;
 			}
-			if (config_tokens[i] == "method")
-			{
-				i++;
-				while (config_tokens[i] != ";")
-				{
-					if (!check_if_method_valid(config_tokens[i]))
-					{
-						std::cout << "ERROR" << std::endl;
-						parse_state = false;
-						return ;
-					}
-					server.methods.push_back(config_tokens[i]);
-					i++;
-				}				
-			}
-			if (config_tokens[i] == "error")
-			{
-				i++;
-				while (config_tokens[i] != ";")
-				{
-					server.errors.push_back(config_tokens[i++]);
-				}
-			}
-			if (config_tokens[i] == "root")
-			{
-				i++;
-				std::string	root = "";
-				root += config_tokens[i++];
-				if (config_tokens[i] != ";")
-				{
-					std::cout << "ERROR" << std::endl;
-					parse_state = false;
-					return ;
-				}
-				server.root = root;
-			}
-			if (config_tokens[i] == "auto_index")
-			{
-				i++;
-				std::string	auto_index = "";
-				auto_index += config_tokens[i++];
-				if (config_tokens[i] != ";")
-				{
-					std::cout << "ERROR" << std::endl;
-					parse_state = false;
-					return ;
-				}
-				server.auto_index = auto_index;
-			}
 			// Necessary block location
 			if (config_tokens[i] == "location")
 			{
@@ -255,15 +201,6 @@ void webserver::parse_server_block(std::string config_file_data)
 				location.prefix = config_tokens[i + 1];
 				i++;
 			}
-			if (config_tokens[i] == "index")
-			{
-				i++;
-				while (config_tokens[i] != ";")
-				{
-					server.indexes.push_back(config_tokens[i]);
-					i++;
-				}	
-			}
 		}
 		// LOCATION BLOCK
 		if (block_state == LOCATION)
@@ -276,6 +213,14 @@ void webserver::parse_server_block(std::string config_file_data)
 					location.indexes.push_back(config_tokens[i]);
 					i++;
 				}	
+			}
+			if (config_tokens[i] == "error")
+			{
+				i++;
+				while (config_tokens[i] != ";")
+				{
+					location.errors.push_back(config_tokens[i++]);
+				}
 			}
 			if (config_tokens[i] == "auto_index")
 			{
@@ -371,6 +316,8 @@ void webserver::parse_server_block(std::string config_file_data)
 				location.client_max_body_size.clear();
 				location.indexes.clear();
 				location.methods.clear();
+				location.errors.clear();
+				location.root.clear();
 			}
 		}
 	}
@@ -380,77 +327,6 @@ void	webserver::print_config_file()
 {
 	for (size_t i = 0; i < server_blocks.size(); i++)
 	{
-		std::cout << "---------Server " << i << "---------\n";
-		if (server_blocks[i].host != "")
-			std::cout << "\t Host: " << server_blocks[i].host << "\n";
-		if (!server_blocks[i].server_name.empty())
-			std::cout << "\t Server name: " << server_blocks[i].server_name << "\n";
-		if (!server_blocks[i].auto_index.empty())
-			std::cout << "\t Auto-index: " << server_blocks[i].auto_index << "\n";
-		if (!server_blocks[i].root.empty())
-			std::cout << "\tRoot: " << server_blocks[i].root << "\n";
-		if (!server_blocks[i].port.empty())
-		{
-			std::cout << "\t----port-----\n"; 
-			std::cout << "\t\t Port: " << " " << server_blocks[i].port << "\n";
-		}
-		if (!server_blocks[i].methods.empty())
-		{
-			std::cout << "\t----Allowed Methods----\n";
-			for (size_t j = 0; j < server_blocks[i].methods.size(); j++)
-			{
-				std::cout << "\t\t|" << server_blocks[i].methods[j] << "|\n";
-			}
-		}
-		if (!server_blocks[i].errors.empty())
-		{
-			std::cout << "\t----Error----\n";
-			for (size_t j = 0; j < server_blocks[i].errors.size(); j++)
-			{
-				std::cout << "\t\t|" << server_blocks[i].errors[j] << "|\n";
-			}
-		}
-		if (!server_blocks[i].indexes.empty())
-		{
-			std::cout << "\t\t-----Indexes----	\n";
-			for (size_t j = 0; j < server_blocks[i].indexes.size(); j++)
-			{
-				std::cout << "\t\t" << server_blocks[i].indexes[j] << std::endl;
-			}
-		}
-		if (!server_blocks[i].locations.empty())
-		{
-			std::cout << "\t-----Locations------\n";
-			for (size_t j = 0; j < server_blocks[i].locations.size(); j++)
-			{
-				if (!server_blocks[i].locations[j].auto_index.empty())
-					std::cout << "\tAuto Index: " << server_blocks[i].locations[j].auto_index << std::endl;
-				if (!server_blocks[i].locations[j].client_max_body_size.empty())
-					std::cout << "\tMax Body Size: " << server_blocks[i].locations[j].client_max_body_size << std::endl;
-				if (!server_blocks[i].locations[j].prefix.empty())
-					std::cout << "\tPrefix: " << server_blocks[i].locations[j].prefix << std::endl;
-				if (!server_blocks[i].locations[j].cgi_exec.empty())
-					std::cout << "\tCGI EXEC: " << server_blocks[i].locations[j].cgi_exec << std::endl;
-				if (!server_blocks[i].locations[j].cgi_path.empty())
-					std::cout << "\tCGI PATH: " << server_blocks[i].locations[j].cgi_path << std::endl;	
-				if (!server_blocks[i].locations[j].indexes.empty())
-				{
-					std::cout << "\t\t-----Indexes----	\n";
-					for (size_t k = 0; k < server_blocks[i].locations[j].indexes.size(); k++)
-					{
-						std::cout << "\t\t" << server_blocks[i].locations[j].indexes[k] << std::endl;
-					}
-				}
-				if (!server_blocks[i].locations[j].methods.empty())
-				{
-					std::cout << "\t\t-----Allowed Methods----	\n";
-					for (size_t k = 0; k < server_blocks[i].locations[j].methods.size(); k++)
-					{
-						std::cout << "\t\t" << server_blocks[i].locations[j].methods[k] << std::endl;
-					}
-				}
-			}			
-		}
-		std::cout << "\n\n\n";
+
 	}
 }
