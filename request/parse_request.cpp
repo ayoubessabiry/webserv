@@ -90,8 +90,12 @@ bool request::body_chunked_encoding(std::string &req)
 		}
 		chunk_saver += req;
 		if (chunk_saver.size() > chunk_size)
-			next_hex_saver = req.substr(chunk_size, chunk_saver.size());
-		found_next_hexa = !(chunk_saver.size() == chunk_size);
+		{
+			std::string chunk = chunk_saver;
+			next_hex_saver = chunk.substr(chunk_size, chunk_saver.size());
+			chunk_saver = chunk.substr(0, chunk_size);
+		}
+		found_next_hexa = !(chunk_saver.size() >= chunk_size);
 
 		std::fstream	body_file;
 		body_file.open(file_name.c_str(), 
