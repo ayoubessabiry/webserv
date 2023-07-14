@@ -38,10 +38,7 @@ int	convert_hex_to_decimal(std::string hex_number)
 
 bool request::body_chunked_encoding(std::string &req)
 {
-int	body_chunk_size = req.size();
-
-    if (!found_next_hexa)
-        next_hex_saver = req;
+	int	body_chunk_size = req.size();
 
 	is_reading_new_chunk_part = true;
 	while(body_chunk_size)
@@ -49,15 +46,18 @@ int	body_chunk_size = req.size();
 		// Search for first hexa
 		if (!found_next_hexa)
 		{
-            std::string chunk_part = next_hex_saver;
+			if (is_reading_new_chunk_part)
+				chunk_part += req;
 			if (!strstr(chunk_part.c_str(), "\r\n"))
 				return false;
-			std::size_t find = next_hex_saver.find("\r\n");
-			next_hex_saver = next_hex_saver.substr(0, find);
+			std::size_t find = chunk_part.find("\r\n");
+			next_hex_saver = chunk_part.substr(0, find);
+			std::cout << next_hex_saver << std::endl;
             found_next_hexa = true;
 			chunk_size = convert_hex_to_decimal(next_hex_saver);
 			if (chunk_size == 0)
 			{
+				std::cout << "here" << std::endl;
 				found_next_hexa = false;
 				return true ;
 			}
@@ -75,16 +75,12 @@ int	body_chunk_size = req.size();
 							std::ios_base::app);
 
 			if (is_reading_new_chunk_part)
-			{
-				chunk_saver += req;
                 is_reading_new_chunk_part = false;
-            }
 			if (chunk_saver.size() >= chunk_size)
 			{
 				std::string chunk = chunk_saver;
 				next_hex_saver = chunk.substr(chunk_size, chunk_saver.size());
                 chunk_saver = chunk.substr(0, chunk_size);
-                std::cout << chunk_saver << "\n\n";
                 body_file << chunk_saver;
                 body_chunk_size -= chunk_saver.size();
 			}
@@ -176,6 +172,7 @@ bool	send_request(Client& client, std::string& buff)
 		
 		if (client.rqst.headers.count("Content-Length"))
 		{
+			std::cout << "here" << std::endl;
 			body_file << client.request_collector;
 			int	content_length;
 			std::istringstream(client.rqst.headers["Content-Length"]) >> content_length;
@@ -195,7 +192,7 @@ bool	send_request(Client& client, std::string& buff)
 	{
 		//client.rqst.print_request();
 		client.is_reading_body = false;
-		//std::cout << "\nRequest Ended\n";
+		std::cout << "\nRequest Ended\n";
 
 		client.request_collector = "";
 	}

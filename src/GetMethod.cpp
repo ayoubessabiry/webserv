@@ -59,3 +59,8 @@ void GetMethod::initGetMethod()
         }
     }
 }
+
+void GetMethod::setIndexes(const std::vector<std::string>& a)
+{
+    indexes = a;
+}

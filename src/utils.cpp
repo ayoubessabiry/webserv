@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbaich <adbaich@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/01 13:46:24 by adbaich           #+#    #+#             */
-/*   Updated: 2023/07/14 12:26:01 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/14 18:06:48 by adbaich          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ std::string ft_get_path(std::string request, std::string &method)
 bool ft_check_file(std::string file_name)
 {
 
-	std::ifstream file(file_name.c_str());
+	std::ifstream file(file_name);
 
 	if (!file.is_open())
 	{
@@ -118,7 +118,6 @@ std::vector<std::string> getFileWithinDirectory(const char *dir)
 		}
 		filesWithinDirectory.push_back(fileWithinDirectory);
 	}
-	closedir(dirp);
 	return filesWithinDirectory;
 }
 
@@ -168,12 +167,24 @@ bool methodIsAllowed(std::string method, std::vector<std::string> &allowedMethod
 	return false;
 }
 
-void uploadFile(std::string &filePath, std::string &contentFile)
+void uploadFile(std::string &fileToWrite, std::string &fileToRead)
 {
+	size_t sizeOfFileToRead = calculateSizeOfFile(fileToRead);
+	size_t BytesRead = 0;
 	std::ofstream file;
+	std::string rangeFromFile;
 
-	file.open(filePath.c_str(), std::ios_base::binary);
-	file << contentFile;
+	file.open(fileToWrite.c_str(), std::ios_base::binary);
+	while (true)
+	{
+		rangeFromFile = getRangeFromFile(fileToRead.c_str(), BytesRead, 1000);
+		if (BytesRead >= sizeOfFileToRead)
+		{
+			break;
+		}
+		file << rangeFromFile;
+		BytesRead += rangeFromFile.size();
+	}
 	file.close();
 }
 
@@ -207,7 +218,7 @@ bool canNotOpenDirectoryOrSubDirectories(const char *dir)
 	return false;
 }
 
-void deleteDirectoryContent(std::string& dir)
+void deleteDirectoryContent(std::string &dir)
 {
 	std::vector<std::string> filesWithinDirectory = getFileWithinDirectory(dir.c_str());
 
@@ -224,36 +235,23 @@ void deleteDirectoryContent(std::string& dir)
 	remove(dir.c_str());
 }
 
-std::ifstream::pos_type filesize(const char* filename)
+std::string getRangeFromFile(const char *path, int start, size_t buffer_size)
 {
-    std::ifstream in(filename, std::ifstream::ate | std::ifstream::binary);
-	std::ifstream::pos_type s = in.tellg();
-	in.close();
-    return s; 
-}
+	std::ifstream file;
 
-std::string getRangeFromFile(const char* path, int start, size_t buffer_size)
-{
-	std::ifstream	file;
-
-	size_t fileSize = filesize(path);
 	file.open(path, std::ifstream::binary);
-	if (start >= fileSize){
-		std::string		body;
-		file.close();
-		return  body;
-	}
-	char* buffer = new char[buffer_size + 1];
+	char *buffer = new char[buffer_size + 1];
 	file.seekg(start);
 	file.read(buffer, buffer_size);
-	// buffer[file.gcount()] = '\0';
-	std::string	body(buffer, file.gcount());
-	delete [] buffer;
+	buffer[file.gcount()] = '\0';
+	std::string body(buffer, file.gcount());
+	delete[] buffer;
 	file.close();
 	return body;
 }
 
-std::string	intToString(int	num) {
+std::string intToString(int num)
+{
 
 	std::string string;
 
@@ -270,4 +268,16 @@ std::string	intToString(int	num) {
 	}
 	string = std::string(string.rbegin(), string.rend());
 	return string;
+}
+
+size_t calculateSizeOfFile(const std::string &fileName)
+{
+	std::ifstream file;
+
+	file.open(fileName, std::ios::binary);
+	file.seekg(0, file.end);
+	size_t fileLength = file.tellg();
+	file.seekg(0, file.beg);
+	file.close();
+	return fileLength;
 }

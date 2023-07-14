@@ -1,3 +1,4 @@
+#pragma once
 #include "header.hpp"
 
 class MandatoryResponseHeaders
@@ -12,7 +13,7 @@ protected:
 	std::string startLineString;
 	std::string contentLength;
 	std::string contentType;
-	std::string bodyRequest;
+	std::string bodyRequestFile;
 	std::string fileName;
 	std::string date;
 	std::string responseHeaders;
@@ -54,7 +55,7 @@ protected:
 
 public:
 	const std::string getResponseHeaders();
-	std::string getResponseBody();
+	const std::string getResponseBody();
 
 	/*
 	** --------------------------------- SETTERS ----------------------------------
@@ -68,4 +69,7 @@ public:
 	void setAllowedMethods(const std::vector<std::string>& a);
 	void setLocationRedirectionPath(const std::string& l);
 	void setfileName(const std::string& f);
+	void setHttpStatusFiles(int	statusCode, const char* path);
+	void setBodyRequestFile(const std::string& f);
+
 };

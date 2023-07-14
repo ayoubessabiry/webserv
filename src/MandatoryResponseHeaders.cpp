@@ -56,13 +56,13 @@ void MandatoryResponseHeaders::startLine()
 }
 void MandatoryResponseHeaders::calculateContentLength()
 {
-    size_t fileLength;
     contentLength.append("Content-Length: ");
     std::ifstream file;
+    size_t fileLength = 0;
 
     if (autoIndexFile.empty())
     {
-        file.open(fileName.c_str(), std::ios::binary);
+        file.open(fileName, std::ios::binary);
         file.seekg(0, file.end);
         fileLength = file.tellg();
         file.seekg(0, file.beg);
@@ -78,7 +78,7 @@ void MandatoryResponseHeaders::calculateContentLength()
 }
 bool MandatoryResponseHeaders::canNotOpenFileForRead()
 {
-    std::ifstream file(fileName.c_str());
+    std::ifstream file(fileName);
 
     if (!file.is_open())
     {
@@ -98,7 +98,7 @@ bool MandatoryResponseHeaders::canNotOpenFileForRead()
 }
 bool MandatoryResponseHeaders::canNotOpenFileForWrite()
 {
-    std::ofstream file(fileName.c_str());
+    std::ofstream file(fileName);
 
     if (!file.is_open())
     {
@@ -124,11 +124,15 @@ void MandatoryResponseHeaders::initHttpStatusFiles()
 {
     httpStatusFiles[201] = "./errors/201.html";
     httpStatusFiles[400] = "./errors/400.html";
-    httpStatusFiles[405] = "./errors/405.html";
-    httpStatusFiles[409] = "./errors/409.html";
     httpStatusFiles[404] = "./errors/404.html";
+    httpStatusFiles[405] = "./errors/405.html";
     httpStatusFiles[403] = "./errors/403.html";
     httpStatusFiles[500] = "./errors/500.html";
+}
+
+void MandatoryResponseHeaders::setHttpStatusFiles(int	statusCode, const char* path)
+{
+	httpStatusFiles[statusCode] = path;
 }
 
 void MandatoryResponseHeaders::setContentType()
@@ -164,17 +168,16 @@ const std::string MandatoryResponseHeaders::getResponseHeaders()
 }
 void MandatoryResponseHeaders::setResponseBody()
 {
-    if (autoIndex && !autoIndexFile.empty() && bytesSent != autoIndexFile.size())
+    if (autoIndex && !autoIndexFile.empty())
     {
         responseBody = autoIndexFile;
-        autoIndexFile.clear();
     }
     else
     {
         responseBody = getRangeFromFile(fileName.c_str(), bytesSent, bufferSize);
     }
 }
-std::string MandatoryResponseHeaders::getResponseBody()
+const std::string MandatoryResponseHeaders::getResponseBody()
 {
     setResponseBody();
     return responseBody;
@@ -208,3 +211,10 @@ void MandatoryResponseHeaders::setfileName(const std::string &f)
 {
     fileName = f;
 }
+
+void MandatoryResponseHeaders::setBodyRequestFile(const std::string& f)
+{
+    bodyRequestFile = f;
+}
+
+

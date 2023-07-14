@@ -46,11 +46,12 @@ bool isIndexWithinDirectory(std::string &fileName, std::vector<std::string> inde
 std::string getAutoIndex(const char *dir);
 std::vector<std::string> getFileWithinDirectory(const char *dir);
 bool methodIsAllowed(std::string method, std::vector<std::string> &allowedMethods);
-void uploadFile(std::string &filePath, std::string &contentFile);
+void uploadFile(std::string &filePath, std::string &bodyRequestFile);
 bool pathDoesNotExist(const char *path);
 bool canNotOpenDirectoryOrSubDirectories(const char *dir);
 void deleteDirectoryContent(std::string& dir);
-std::string getRangeFromFile(const char* path, int start, size_t buffer_size);
+std::string	getRangeFromFile(const char* path, int start, size_t buffer_size);
 std::string	intToString(int	num);
+size_t	calculateSizeOfFile(const std::string& fileName);
 
 _MAP get_map();

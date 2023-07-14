@@ -1,10 +1,12 @@
 #ifndef CLIENT_HPP_GARD
 # define CLIENT_HPP_GARD
-# define MAX_REQUEST_SIZE 1080
+# define MAX_REQUEST_SIZE 65535
 # include "webserv.hpp"
 # include "parse_request.hpp"
 # include "parse_config.hpp"
 # include "GetMethod.hpp"
+# include "PostMethod.hpp"
+# include "DeleteMethod.hpp"
 
 class request
 {
@@ -14,9 +16,11 @@ class request
 		std::string								body;
 		std::string								status;
 		std::string 							file_name;
+		std::string								chunk_part;
 		std::string								chunk_saver;
 		std::string								next_hex_saver;
 		std::map<std::string, std::string>		headers;
+		bool									is_reading_chunked;
 
 		int										chunk_size;
 
@@ -37,8 +41,8 @@ public :
 
 	// Responses
 	GetMethod			get;
-	// PostMethod			post;
-	// DeleteMethod		delete_method;
+	PostMethod			post;
+	DeleteMethod		delete_method;
 
 	socklen_t			addr_size;
 	sockaddr_storage	client_add;

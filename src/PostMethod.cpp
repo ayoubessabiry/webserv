@@ -19,7 +19,7 @@ void PostMethod::postProcess()
         }
         else
         {
-            uploadFile(fileName, bodyRequest);
+            uploadFile(fileName, bodyRequestFile);
             StatusCode = 201;
             setFileNameToFileError();
         }

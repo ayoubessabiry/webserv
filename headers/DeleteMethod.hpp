@@ -9,6 +9,7 @@ class DeleteMethod : public MandatoryResponseHeaders
 	** --------------------------------- CONSTRUCTOR ----------------------------------
 	*/
 
+public:
     DeleteMethod();
 
     /*
@@ -16,6 +17,7 @@ class DeleteMethod : public MandatoryResponseHeaders
 	*/
 
     void deleteProcess();
+private:
     void deleteDirectory();
     void deleteFile();
 };

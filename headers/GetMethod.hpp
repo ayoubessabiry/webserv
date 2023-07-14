@@ -9,18 +9,15 @@ class GetMethod : public MandatoryResponseHeaders
     /*
     ** --------------------------------- CONSTRUCTOR ----------------------------------
     */
-    public:
 
 public:
     GetMethod();
-    void setIndexes( std::vector<std::string> indexes)
-    {
-        this->indexes = indexes;
-    }
+
     /*
     ** --------------------------------- METHODS ----------------------------------
     */
     void initGetMethod();
+    void setIndexes(const std::vector<std::string>& a);
 private:
     void setInvalidResource();
     void DirectoryResponse();

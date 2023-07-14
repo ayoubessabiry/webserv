@@ -12,7 +12,7 @@ SRC= request/parse_request.cpp \
 	main.cpp\
 	client.cpp\
 
-CPPFLAGS= -Wall -Wextra -Werror -std=c++98
+CPPFLAGS= -Wall -Wextra -Werror -std=c++98 -fsanitize=address
 NAME = webserv
 
 all : $(NAME)
