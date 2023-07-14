@@ -6,7 +6,7 @@
 /*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/01 13:46:24 by adbaich           #+#    #+#             */
-/*   Updated: 2023/07/13 19:23:18 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/14 12:26:01 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,7 @@ std::vector<std::string> getFileWithinDirectory(const char *dir)
 		}
 		filesWithinDirectory.push_back(fileWithinDirectory);
 	}
+	closedir(dirp);
 	return filesWithinDirectory;
 }
 
@@ -226,47 +227,30 @@ void deleteDirectoryContent(std::string& dir)
 std::ifstream::pos_type filesize(const char* filename)
 {
     std::ifstream in(filename, std::ifstream::ate | std::ifstream::binary);
-    return in.tellg(); 
+	std::ifstream::pos_type s = in.tellg();
+	in.close();
+    return s; 
 }
 
 std::string getRangeFromFile(const char* path, int start, size_t buffer_size)
 {
 	std::ifstream	file;
 
+	size_t fileSize = filesize(path);
 	file.open(path, std::ifstream::binary);
-	int fileSize = filesize(path);
 	if (start >= fileSize){
-		//std::cout << "\nhere " << a << " " << fileSize << std::endl;
 		std::string		body;
+		file.close();
 		return  body;
 	}
 	char* buffer = new char[buffer_size + 1];
-	// if (start)
 	file.seekg(start);
 	file.read(buffer, buffer_size);
-	buffer[file.gcount()] = '\0';
+	// buffer[file.gcount()] = '\0';
 	std::string	body(buffer, file.gcount());
-	// body = buffer;
 	delete [] buffer;
-	return body;
 	file.close();
-	return NULL;
-	// std::ifstream	file;
-
-	// file.open(path, std::ifstream::binary);
-	// if (file.is_open())
-	// {
-	// 	char* buffer = new char[buffer_size+1];
-	// 	file.seekg(start);
-	// 	file.read(buffer, buffer_size);
-	// 	buffer[file.gcount()+1] = '\0';
-	// 	std::string	body(buffer, buffer_size+1);
-	// 	delete [] buffer;
-	// 	return body;
-	// }
-	// file.close();
-	// std::string s;
-	// return s;
+	return body;
 }
 
 std::string	intToString(int	num) {

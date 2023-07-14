@@ -164,9 +164,9 @@ const std::string MandatoryResponseHeaders::getResponseHeaders()
 }
 void MandatoryResponseHeaders::setResponseBody()
 {
-    if (autoIndex && !autoIndexFile.empty())
+    if (autoIndex && !autoIndexFile.empty() && bytesSent != autoIndexFile.size())
     {
-        responseBody = const_cast<char *>(autoIndexFile.c_str());
+        responseBody = autoIndexFile;
         autoIndexFile.clear();
     }
     else

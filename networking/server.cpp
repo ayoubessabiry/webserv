@@ -20,7 +20,15 @@ void	Server::create_socket(){
 		std::cerr << "socket() error: " << std::strerror(errno);
 		exit(1);
 	}
+	if (fcntl(_socket, F_SETFL, O_NONBLOCK) == -1){
+		std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+		exit(1);
+	}
 	if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &a, sizeof(int)) < 0){
+		std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+		exit(1);
+	}
+	if (setsockopt(_socket, SOL_SOCKET, SO_NOSIGPIPE, &a, sizeof(int)) < 0){
 		std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
 		exit(1);
 	}

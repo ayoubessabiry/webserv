@@ -1,3 +1,5 @@
 a.out
 .vscode/
 a.out.DSYM/
+*.mp4
+*.jpg
