@@ -24,6 +24,10 @@ void	Server::create_socket(){
 		std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
 		exit(1);
 	}
+	if (setsockopt(_socket, SOL_SOCKET, SO_NOSIGPIPE, &a, sizeof(int)) < 0){
+		std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+		exit(1);
+	}
 	if (bind(_socket, bind_addr->ai_addr, bind_addr->ai_addrlen) == -1){
 		std::cerr << "bind() error: " << std::strerror(errno);
 		exit(1);
