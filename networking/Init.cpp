@@ -34,7 +34,9 @@ void	Init::add_client(int new_client){
 	client.rqst.body = "";
 	client.request_collector = "";
 	client.socket = new_socket;
+	client.bytes_sent = 0;
 	client.recv_byte = 0;
+	client.header = true;
 
 	clients.push_back(client);
 	FD_SET(new_socket, &masterRead);
@@ -95,25 +97,28 @@ void	Init::send_response(int ready_client){
 	clients[i].get.setAllowedMethods(clients[i].desired_location.methods);
 	// clients[i].get.setfileName(clients[i].rqst.file_name);
 	clients[i].get.initGetMethod();
-
-	std::string	responseHeader(clients[i].get.getResponseHeaders());
-	send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
-	size_t bytes_sent = 0;
-	std::string	responseBody;
-	while (1)
-	{
-		responseBody = clients[i].get.getResponseBody();
-		if (responseBody.empty()){
-			break ;
-		}
-		bytes_sent += send(clients[i].socket, responseBody.c_str(), responseBody.size(), 0);
-		clients[i].get.setBytesSent(bytes_sent);
-	}
 	/////////////////////////////
-	FD_CLR(clients[i].socket, &masterWrite);
-	close(clients[i].socket);
-	std::cout << "done" << std::endl;
-	clients.erase(clients.begin()+i);
+	if (clients[i].header){
+		std::string	responseHeader(clients[i].get.getResponseHeaders());
+		send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
+		clients[i].header = false;	
+	}
+	std::string	responseBody = clients[i].get.getResponseBody();
+	if (!responseBody.empty()){
+		int  s = send(clients[i].socket, responseBody.c_str(), responseBody.size(),  0);
+		//std::cout << responseBody;
+		clients[i].bytes_sent += s;
+		clients[i].get.setBytesSent(clients[i].bytes_sent);
+		if (s == -1){
+			std::cout << std::strerror(errno) << std::endl;
+			exit(1);
+		}
+	}
+	if (responseBody.empty()){
+		FD_CLR(clients[i].socket, &masterWrite);
+		close(clients[i].socket);
+		clients.erase(clients.begin()+i);
+	}
 }
 
 void	Init::write_socket(int ready_client){

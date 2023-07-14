@@ -48,9 +48,11 @@ public :
 	request				rqst;
 	server_block		configuration;
 	location_block		desired_location;
+	size_t 				bytes_sent;
 	ssize_t				recv_byte;
 	ssize_t				header_byte;
 	ssize_t				body_byte;
+	bool				header;
 	char				buffer[MAX_REQUEST_SIZE];
 	int					socket;
 	location_block		match_location();
