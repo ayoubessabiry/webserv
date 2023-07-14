@@ -1,13 +1,20 @@
 #include "../headers/parse_config.hpp"
 
-bool	check_if_directive_valid(std::string directive)
+bool	check_if_directive_valid_in_server(std::string directive)
 {
 	return  directive == "listen" ||
 			directive == "host" ||
 			directive == "server_name" ||
-			directive == "index" || 
+			directive == "location";
+}
+
+bool	check_if_directive_valid_in_location(std::string directive)
+{
+	return  directive == "index" || 
 			directive == "auto_index" ||
 			directive == "root" || 
+			directive == "methods" || 
+			directive == "upload" || 
 			directive == "client_max_body_size" ||
 			directive == "return" ||
 			directive == "cgi_exec" ||
@@ -38,10 +45,8 @@ bool	check_if_host_valid(std::string ip)
 		count++;
 	}
 
-	if (count > 4)
-	{
+	if (count > 4 || count < 4)
 		return false;
-	}
 
 	return true;
 }
@@ -74,7 +79,7 @@ void webserver::parse_server_block(std::string config_file_data)
 	size_t	port_directive_numbers = 0;
 	size_t	host_directive_numbers = 0;
 	size_t	location_block_numbers = 0;
-	bool	parse_state = true;
+	size_t	root_directive_numbers = 0;
 
 	server_block	server;
 	location_block	location;
@@ -131,7 +136,12 @@ void webserver::parse_server_block(std::string config_file_data)
 				block_state = 0;
 				if (port_directive_numbers == 0 || host_directive_numbers == 0 || location_block_numbers == 0)
 				{
-					std::cout << "ERROR" << std::endl;
+					if (port_directive_numbers == 0)
+						std::cout << "Error: Server should have a port !!" << std::endl;
+					if (host_directive_numbers == 0)
+						std::cout << "Error: Server should have a host !!" << std::endl;
+					if (location_block_numbers == 0)
+						std::cout << "Error: Server should have a location block !!" << std::endl;
 					parse_state = false;
 					server_blocks.clear();
 					return ;
@@ -142,12 +152,27 @@ void webserver::parse_server_block(std::string config_file_data)
 				server_blocks.push_back(server);
 			}
 			// Necessary directives listen and host
+			if (config_tokens[i] != "{" && config_tokens[i] != "}"
+				 && !check_if_directive_valid_in_server(config_tokens[i]))
+			{
+				std::cout << "Error: "<< config_tokens[i]
+									<<" Invalid Directive in server block !!"
+				 << std::endl;
+				parse_state = false;
+				return ;
+			}
 			if (config_tokens[i] == "listen")
 			{
 				i++;
 				port_directive_numbers++;
 				if (check_if_port_valid(config_tokens[i]))
 					server.port = (config_tokens[i++]);
+				else
+				{
+					std::cout << "Error: Port is invalid !!" << std::endl;
+					parse_state = false;
+					return ;
+				}
 				if (config_tokens[i] != ";")
 				{
 					std::cout << "ERROR\n";
@@ -169,7 +194,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				if (config_tokens[i] != ";" || 
 					!check_if_host_valid(host))
 				{
-					std::cout << "ERROR\n";
+					std::cout << "Error: Host is invalid" << std::endl;
 					parse_state = false;
 					return ;
 				}
@@ -191,6 +216,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				{
 					block_state = LOCATION;
 					location_block_numbers++;
+					i++;
 				}
 				else
 				{
@@ -205,6 +231,15 @@ void webserver::parse_server_block(std::string config_file_data)
 		// LOCATION BLOCK
 		if (block_state == LOCATION)
 		{
+			if (config_tokens[i] != "{" && config_tokens[i] != "}"
+				 && !check_if_directive_valid_in_location(config_tokens[i]))
+			{
+				std::cout << "Error: "<< config_tokens[i]
+									<<" Invalid Directive in location block !!"
+				 << std::endl;
+				parse_state = false;
+				return ;
+			}
 			if (config_tokens[i] == "index")
 			{
 				i++;
@@ -225,20 +260,35 @@ void webserver::parse_server_block(std::string config_file_data)
 			if (config_tokens[i] == "auto_index")
 			{
 				i++;
-				std::string	auto_index = "";
-				auto_index += config_tokens[i++];
+				location.auto_index = config_tokens[i++];
+				if (location.auto_index != "off" && location.auto_index != "on")
+				{
+					std::cout << "Error: Auto index value should be on/off !!" << std::endl;
+					parse_state = false;
+					return ;
+				}
 				if (config_tokens[i] != ";")
 				{
 					std::cout << "ERROR" << std::endl;
 					parse_state = false;
 					return ;
 				}
-				location.auto_index = auto_index;
 			}
 			if (config_tokens[i] == "client_max_body_size")
 			{
 				i++;
 				location.client_max_body_size = config_tokens[i++];
+				if (config_tokens[i] != ";")
+				{
+					std::cout << "ERROR" << std::endl;
+					parse_state = false;
+					return ;
+				}
+			}
+			if (config_tokens[i] == "upload")
+			{
+				i++;
+				location.upload = config_tokens[i++];
 				if (config_tokens[i] != ";")
 				{
 					std::cout << "ERROR" << std::endl;
@@ -280,14 +330,14 @@ void webserver::parse_server_block(std::string config_file_data)
 					return ;
 				}
 			}
-			if (config_tokens[i] == "method")
+			if (config_tokens[i] == "methods")
 			{
 				i++;
 				while (config_tokens[i] != ";")
 				{
 					if (!check_if_method_valid(config_tokens[i]))
 					{
-						std::cout << "ERROR" << std::endl;
+						std::cout << "Error: Valid methods are GET, POST, DELETE" << std::endl;
 						parse_state = false;
 						return ;
 					}
@@ -298,18 +348,23 @@ void webserver::parse_server_block(std::string config_file_data)
 			if (config_tokens[i] == "root")
 			{
 				i++;
-				std::string	root = "";
-				root += config_tokens[i++];
+				root_directive_numbers++;
+				location.root = config_tokens[i++];
 				if (config_tokens[i] != ";")
 				{
 					std::cout << "ERROR" << std::endl;
 					parse_state = false;
 					return ;
 				}
-				location.root = root;
 			}
 			if (config_tokens[i] == "}")
 			{
+				if (root_directive_numbers <= 0 || root_directive_numbers > 1)
+				{
+					std::cout << "Error: Should have only one root !!" << std::endl;
+					parse_state = false;
+					return ;
+				}
 				block_state = SERVER;
 				server.locations.push_back(location);
 				location.auto_index.clear();
