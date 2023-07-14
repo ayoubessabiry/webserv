@@ -20,7 +20,7 @@ class request
 
 		int										chunk_size;
 
-		bool			is_reading_chunked;
+		bool			is_reading_new_chunk_part;
 		bool			found_next_hexa;
 
 		std::string	random_file_name_generate();

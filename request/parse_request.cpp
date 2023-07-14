@@ -12,33 +12,6 @@
 
 #include "../headers/parse_request.hpp"
 
-void request::print_request()
-{
-	std::map<std::string, std::string>::iterator	it;
-
-	std::cout << "\e[1;33m----------Request Line----------\n";
-	if (!method.empty())
-		std::cout << "\e[1;33m Method: \e[0;33m" << method << "\n";
-	if (!uri.empty())
-	{
-		std::cout << "\e[1;33m Request Uri: \e[0;33m" << uri << "\n";
-		std::cout << "\n\n";
-	}
-
-	for	(it = headers.begin(); it != headers.end() ; ++it)
-	{
-		std::cout << "\e[1;32m----------Header value----------\e[0;32m\n";
-		std::cout << "\e[1;32mHeader: \e[0;32m|" << it->first << "|\n";
-		std::cout << "\e[1;32mValue: \e[0;32m|" << it->second << "|\n";
-	}
-
-	if (!body.empty())
-	{
-		std::cout << "\e[1;35m---------Body------------\e[0;35m\n";
-		std::cout << "\e[1;35m" << body;
-	}
-}
-
 std::string	random_file_name()
 {
 	std::string alphas = "abcdefghijklmnopqrstuvwxyz123456789";
@@ -46,11 +19,8 @@ std::string	random_file_name()
 
 	srand(time(0));
 
-	file_name += alphas[rand() % alphas.size()];
-	file_name += alphas[rand() % alphas.size()];
-	file_name += alphas[rand() % alphas.size()];
-	file_name += alphas[rand() % alphas.size()];
-	file_name += alphas[rand() % alphas.size()];
+	for	(int i = 0 ; i < 13; i++)
+		file_name += alphas[rand() % alphas.size()];
 
 	return file_name;
 }
@@ -68,44 +38,63 @@ int	convert_hex_to_decimal(std::string hex_number)
 
 bool request::body_chunked_encoding(std::string &req)
 {
+int	body_chunk_size = req.size();
 
-	while(1)
+    if (!found_next_hexa)
+        next_hex_saver = req;
+
+	is_reading_new_chunk_part = true;
+	while(body_chunk_size)
 	{
 		// Search for first hexa
 		if (!found_next_hexa)
 		{
-			if (!strstr(req.c_str(), "\r\n"))
+            std::string chunk_part = next_hex_saver;
+			if (!strstr(chunk_part.c_str(), "\r\n"))
 				return false;
-			std::size_t find = req.find("\r\n");
-			next_hex_saver += req.substr(0, find);
-			found_next_hexa = true;
+			std::size_t find = next_hex_saver.find("\r\n");
+			next_hex_saver = next_hex_saver.substr(0, find);
+            found_next_hexa = true;
 			chunk_size = convert_hex_to_decimal(next_hex_saver);
-			chunk_saver = req.substr(find + 2, req.size());
-		}
-		// Proceed to find other hexas to convert
-		if (found_next_hexa)
-		{
 			if (chunk_size == 0)
 			{
 				found_next_hexa = false;
 				return true ;
 			}
-			chunk_saver += req;
-			if (chunk_saver.size() > chunk_size)
+            chunk_saver = chunk_part.substr(find + 2, chunk_part.size());
+            is_reading_new_chunk_part = false;
+			body_chunk_size -= next_hex_saver.size();
+			body_chunk_size -= 2;
+		}
+		// Proceed to find other hexas to convert
+		if (found_next_hexa)
+		{
+			std::fstream	body_file;
+			body_file.open(file_name.c_str(),
+							std::ios_base::binary|std::ios_base::out|
+							std::ios_base::app);
+
+			if (is_reading_new_chunk_part)
+			{
+				chunk_saver += req;
+                is_reading_new_chunk_part = false;
+            }
+			if (chunk_saver.size() >= chunk_size)
 			{
 				std::string chunk = chunk_saver;
 				next_hex_saver = chunk.substr(chunk_size, chunk_saver.size());
-				chunk_saver = chunk.substr(0, chunk_size);
+                chunk_saver = chunk.substr(0, chunk_size);
+                std::cout << chunk_saver << "\n\n";
+                body_file << chunk_saver;
+                body_chunk_size -= chunk_saver.size();
 			}
-			found_next_hexa = !(chunk_saver.size() >= chunk_size);
+            else
+                body_chunk_size -= chunk_saver.size();
+			
+            found_next_hexa = !(chunk_saver.size() >= chunk_size);
 
-			std::fstream	body_file;
-			body_file.open(file_name.c_str(), 
-							std::ios_base::binary|std::ios_base::out|
-							std::ios_base::app);
-			body_file << chunk_saver;
-			if (chunk_saver.size() == 1)
-				break ;
+            if (body_chunk_size <= 0)
+                body_chunk_size = 0;
 		}
 	}
 
