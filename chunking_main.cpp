@@ -16,33 +16,30 @@ bool test(std::string &req, Client &client)
 {
 	int	body_chunk_size = req.size();
 
-    if (!client.rqst.found_next_hexa)
-        client.rqst.next_hex_saver = req;
-
 	client.rqst.is_reading_new_chunk_part = true;
 	while(body_chunk_size)
 	{
-		// Search for first hexa
 		if (!client.rqst.found_next_hexa)
 		{
-            std::string chunk_part = client.rqst.next_hex_saver;
-			if (!strstr(chunk_part.c_str(), "\r\n"))
+			if (client.rqst.is_reading_new_chunk_part)
+				client.rqst.chunk_part += req;
+			if (!strstr(client.rqst.chunk_part.c_str(), "\r\n"))
 				return false;
-			std::size_t find = client.rqst.next_hex_saver.find("\r\n");
-			client.rqst.next_hex_saver = client.rqst.next_hex_saver.substr(0, find);
+			std::size_t find = client.rqst.chunk_part.find("\r\n");
+			client.rqst.next_hex_saver = client.rqst.chunk_part.substr(0, find);
+
             client.rqst.found_next_hexa = true;
-			client.rqst.chunk_size = covert_hex_to_decimal(client.rqst.next_hex_saver);
+			client.rqst.chunk_size = covert_hex_to_decimal(client.rqst.chunk_part);
 			if (client.rqst.chunk_size == 0)
 			{
 				client.rqst.found_next_hexa = false;
 				return true ;
 			}
-            client.rqst.chunk_saver = chunk_part.substr(find + 2, chunk_part.size());
+            client.rqst.chunk_saver = client.rqst.chunk_part.substr(find + 2, client.rqst.chunk_part.size());
             client.rqst.is_reading_new_chunk_part = false;
 			body_chunk_size -= client.rqst.next_hex_saver.size();
 			body_chunk_size -= 2;
 		}
-		// Proceed to find other hexas to convert
 		if (client.rqst.found_next_hexa)
 		{
 			std::fstream	body_file;
@@ -51,24 +48,23 @@ bool test(std::string &req, Client &client)
 							std::ios_base::app);
 
 			if (client.rqst.is_reading_new_chunk_part)
-			{
 				client.rqst.chunk_saver += req;
-                client.rqst.is_reading_new_chunk_part = false;
-            }
 			if (client.rqst.chunk_saver.size() >= client.rqst.chunk_size)
 			{
 				std::string chunk = client.rqst.chunk_saver;
-				client.rqst.next_hex_saver = chunk.substr(client.rqst.chunk_size, client.rqst.chunk_saver.size());
+				client.rqst.chunk_part = chunk.substr(client.rqst.chunk_size, client.rqst.chunk_saver.size());
                 client.rqst.chunk_saver = chunk.substr(0, client.rqst.chunk_size);
-                std::cout << client.rqst.chunk_saver << "\n\n";
                 body_file << client.rqst.chunk_saver;
                 body_chunk_size -= client.rqst.chunk_saver.size();
+				if (client.rqst.is_reading_new_chunk_part)
+					body_chunk_size += req.size();
+            	client.rqst.found_next_hexa = false;
 			}
             else
                 body_chunk_size -= client.rqst.chunk_saver.size();
-			
-            client.rqst.found_next_hexa = !(client.rqst.chunk_saver.size() >= client.rqst.chunk_size);
 
+			client.rqst.is_reading_new_chunk_part = false;
+		
             if (body_chunk_size <= 0)
                 body_chunk_size = 0;
 		}
@@ -82,17 +78,43 @@ int	main(int ac, char **av)
 	Client client;
 
 	client.rqst.next_hex_saver = "";
+	client.rqst.chunk_saver = "";
 	client.rqst.found_next_hexa = false;
 
 	std::string	chunked_body =  
 	"C\r\n"
 	"Some data..."
-	"11\r\n"
-	"Sope more data..."
-    "A\r\n"
-    "ponponponp"
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
+	"C\r\n"
+	"Some data..."
 	"0\r\n";
 
-    std::string o = chunked_body.substr(0, 16);
-    test(chunked_body, client);
+    std::string o = "C\r\n"
+	"So";
+    std::cout << test(chunked_body, client) << std::endl;
 }
