@@ -43,7 +43,6 @@ bool request::body_chunked_encoding(std::string &req)
 	is_reading_new_chunk_part = true;
 	while(body_chunk_size)
 	{
-		// Search for first hexa
 		if (!found_next_hexa)
 		{
 			if (is_reading_new_chunk_part)
@@ -52,12 +51,11 @@ bool request::body_chunked_encoding(std::string &req)
 				return false;
 			std::size_t find = chunk_part.find("\r\n");
 			next_hex_saver = chunk_part.substr(0, find);
-			std::cout << next_hex_saver << std::endl;
+
             found_next_hexa = true;
-			chunk_size = convert_hex_to_decimal(next_hex_saver);
+			chunk_size = covert_hex_to_decimal(chunk_part);
 			if (chunk_size == 0)
 			{
-				std::cout << "here" << std::endl;
 				found_next_hexa = false;
 				return true ;
 			}
@@ -66,29 +64,31 @@ bool request::body_chunked_encoding(std::string &req)
 			body_chunk_size -= next_hex_saver.size();
 			body_chunk_size -= 2;
 		}
-		// Proceed to find other hexas to convert
 		if (found_next_hexa)
 		{
 			std::fstream	body_file;
-			body_file.open(file_name.c_str(),
+			body_file.open(file_name.c_str(), 
 							std::ios_base::binary|std::ios_base::out|
 							std::ios_base::app);
 
 			if (is_reading_new_chunk_part)
-                is_reading_new_chunk_part = false;
+				chunk_saver += req;
 			if (chunk_saver.size() >= chunk_size)
 			{
 				std::string chunk = chunk_saver;
-				next_hex_saver = chunk.substr(chunk_size, chunk_saver.size());
+				chunk_part = chunk.substr(chunk_size, chunk_saver.size());
                 chunk_saver = chunk.substr(0, chunk_size);
                 body_file << chunk_saver;
                 body_chunk_size -= chunk_saver.size();
+				if (is_reading_new_chunk_part)
+					body_chunk_size += req.size();
+            	found_next_hexa = false;
 			}
             else
                 body_chunk_size -= chunk_saver.size();
-			
-            found_next_hexa = !(chunk_saver.size() >= chunk_size);
 
+			is_reading_new_chunk_part = false;
+		
             if (body_chunk_size <= 0)
                 body_chunk_size = 0;
 		}
