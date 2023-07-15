@@ -87,9 +87,20 @@ bool request::body_chunked_encoding(std::string &req)
 				return true ;
 			}
             chunk_saver = chunk_part.substr(find + 2, chunk_part.size());
-            is_reading_new_chunk_part = false;
-			body_chunk_size -= next_hex_saver.size();
-			body_chunk_size -= 2;
+            
+			if (is_reading_new_chunk_part)
+			{
+				if (req.size() > chunk_saver.size())
+					body_chunk_size -= req.size() - chunk_saver.size();
+				else if (req.size() <= chunk_saver.size())
+					body_chunk_size -= chunk_saver.size() - req.size();
+			}
+			else
+			{
+				body_chunk_size -= next_hex_saver.size();
+				body_chunk_size -= 2;
+			}
+			is_reading_new_chunk_part = false;
 		}
 		if (found_next_hexa)
 		{
@@ -100,19 +111,18 @@ bool request::body_chunked_encoding(std::string &req)
 
 			if (is_reading_new_chunk_part)
 				chunk_saver += req;
+			int body_subtract = chunk_saver.size();
 			if (chunk_saver.size() >= chunk_size)
 			{
 				std::string chunk = chunk_saver;
 				chunk_part = chunk.substr(chunk_size, chunk_saver.size());
                 chunk_saver = chunk.substr(0, chunk_size);
                 body_file << chunk_saver;
-                body_chunk_size -= chunk_saver.size();
 				if (is_reading_new_chunk_part)
-					body_chunk_size += req.size();
+					body_subtract = chunk_saver.size() - chunk_size;
             	found_next_hexa = false;
 			}
-            else
-                body_chunk_size -= chunk_saver.size();
+			body_chunk_size -=  body_subtract;
 
 			is_reading_new_chunk_part = false;
 		
