@@ -12,10 +12,37 @@
 
 #include "../headers/parse_request.hpp"
 
+void request::print_request()
+{
+	std::map<std::string, std::string>::iterator	it;
+
+	std::cout << "\e[1;33m----------Request Line----------\n";
+	if (!method.empty())
+		std::cout << "\e[1;33m Method: \e[0;33m" << method << "\n";
+	if (!uri.empty())
+	{
+		std::cout << "\e[1;33m Request Uri: \e[0;33m" << uri << "\n";
+		std::cout << "\n\n";
+	}
+
+	for	(it = headers.begin(); it != headers.end() ; ++it)
+	{
+		std::cout << "\e[1;32m----------Header value----------\e[0;32m\n";
+		std::cout << "\e[1;32mHeader: \e[0;32m|" << it->first << "|\n";
+		std::cout << "\e[1;32mValue: \e[0;32m|" << it->second << "|\n";
+	}
+
+	if (!body.empty())
+	{
+		std::cout << "\e[1;35m---------Body------------\e[0;35m\n";
+		std::cout << "\e[1;35m" << body;
+	}
+}
+
 std::string	random_file_name()
 {
 	std::string alphas = "abcdefghijklmnopqrstuvwxyz123456789";
-	std::string	file_name = "";
+	std::string	file_name = "/tmp/";
 
 	srand(time(0));
 
@@ -53,7 +80,7 @@ bool request::body_chunked_encoding(std::string &req)
 			next_hex_saver = chunk_part.substr(0, find);
 
             found_next_hexa = true;
-			chunk_size = covert_hex_to_decimal(chunk_part);
+			chunk_size = convert_hex_to_decimal(chunk_part);
 			if (chunk_size == 0)
 			{
 				found_next_hexa = false;
@@ -134,7 +161,6 @@ bool request::parse_request_data(std::string &appended_string, bool &is_reading_
 
 	if (method != "GET" && method != "POST" && method != "DELETE" && !is_reading_body)
 	{
-		std::cout << "Here error\n";
 		return true;
 		status = "400";
 	}
@@ -149,9 +175,18 @@ bool request::parse_request_data(std::string &appended_string, bool &is_reading_
 	return false;
 }
 
+
+std::ifstream::pos_type filesize(const char* filename)
+{
+    std::ifstream in(filename, std::ifstream::ate | std::ifstream::binary);
+    return in.tellg(); 
+}
+
 bool	send_request(Client& client, std::string& buff)
 {
 	bool	ended = false;
+
+	std::cout << buff;
 
 	if (client.is_reading_body)
 		client.request_collector = "";
@@ -172,13 +207,13 @@ bool	send_request(Client& client, std::string& buff)
 		
 		if (client.rqst.headers.count("Content-Length"))
 		{
-			std::cout << "here" << std::endl;
 			body_file << client.request_collector;
+			body_file.flush();
 			int	content_length;
 			std::istringstream(client.rqst.headers["Content-Length"]) >> content_length;
-			if (client.rqst.body.size() >= content_length)
+			// std::cout << content_length << " wana 3ndi " << filesize(client.rqst.file_name.c_str())<< std::endl;
+			if (filesize(client.rqst.file_name.c_str()) >= content_length)
 			{
-				std::cout << content_length << " wana 3ndi " << client.rqst.body.size() << std::endl;
 				ended = true;
 			}
 		}
@@ -190,7 +225,7 @@ bool	send_request(Client& client, std::string& buff)
 
 	if (ended)
 	{
-		//client.rqst.print_request();
+		// client.rqst.print_request();
 		client.is_reading_body = false;
 		std::cout << "\nRequest Ended\n";
 

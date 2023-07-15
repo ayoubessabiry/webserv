@@ -20,6 +20,7 @@ class request
 		std::string								chunk_saver;
 		std::string								next_hex_saver;
 		std::map<std::string, std::string>		headers;
+		// std::fstream							body_file;
 		bool									is_reading_chunked;
 
 		int										chunk_size;

@@ -56,6 +56,7 @@ void	Init::get_rqst(int ready_client){
 	std::string	buff(clients[i].buffer, recB);
 	if(send_request(clients[i], buff)){
 		// move ready_client to send();
+		std::cout << "done" << std::endl;
 		std::string host = clients[i].rqst.headers["Host"];
 		size_t size = host.size();
 		size_t find_dot = host.find(":");
@@ -84,11 +85,10 @@ void	Init::send_response(int ready_client){
 	// std::cout << clients[i].desired_location.methods[0];
 	// std::cout << clients[i].desired_location.root + clients[i].rqst.uri << std::endl;
 
-	clients[i].get.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
-
 	/////////////////////////////
 	if (clients[i].rqst.method == "GET")
 	{
+		clients[i].get.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
 		clients[i].get.setBufferSize(MAX_REQUEST_SIZE);
 		bool	auto_index;
 		if (clients[i].desired_location.auto_index == "on")
@@ -127,9 +127,9 @@ void	Init::send_response(int ready_client){
 	{
 		clients[i].post.setBufferSize(MAX_REQUEST_SIZE);
 
-
+		std::cout << clients[i].desired_location.upload << std::endl;
 		clients[i].post.setAllowedMethods(clients[i].desired_location.methods);
-		// clients[i].get.setfileName(clients[i].rqst.file_name);
+		clients[i].post.setfileName(clients[i].rqst.uri);
 		clients[i].post.setUploadDirectory(clients[i].desired_location.upload);
 		clients[i].post.setBodyRequestFile(clients[i].rqst.file_name);
 		clients[i].post.postProcess();

@@ -217,7 +217,6 @@ void webserver::parse_server_block(std::string config_file_data)
 				location.prefix = config_tokens[i + 1];
 				if (config_tokens[i + 2] == "{")
 				{
-					std::cout << "here\n";
 					block_state = LOCATION;
 					location_block_numbers++;
 					i++;
