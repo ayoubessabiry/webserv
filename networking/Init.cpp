@@ -27,7 +27,9 @@ void	Init::add_client(int new_client){
 
 	// client.configuration = server_block[new_client];
 	client.rqst.chunk_part = "";
+	client.rqst.chunk_saver = "";
 	client.rqst.found_next_hexa = false;
+	client.rqst.b_size = 0;
 	client.rqst.is_reading_chunked = false;
 	client.body_file_opened = false;
 	client.is_reading_body = false;
@@ -82,10 +84,7 @@ void	Init::send_response(int ready_client){
 
 	clients[i].desired_location = clients[i].match_location();
 
-	// std::cout << clients[i].desired_location.methods[0];
-	// std::cout << clients[i].desired_location.root + clients[i].rqst.uri << std::endl;
-
-	/////////////////////////////
+	////////////////////////////
 	if (clients[i].rqst.method == "GET")
 	{
 		clients[i].get.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
@@ -127,7 +126,6 @@ void	Init::send_response(int ready_client){
 	{
 		clients[i].post.setBufferSize(MAX_REQUEST_SIZE);
 
-		std::cout << clients[i].desired_location.upload << std::endl;
 		clients[i].post.setAllowedMethods(clients[i].desired_location.methods);
 		clients[i].post.setfileName(clients[i].rqst.uri);
 		clients[i].post.setUploadDirectory(clients[i].desired_location.upload);

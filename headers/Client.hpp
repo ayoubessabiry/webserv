@@ -1,6 +1,6 @@
 #ifndef CLIENT_HPP_GARD
 # define CLIENT_HPP_GARD
-# define MAX_REQUEST_SIZE 1
+# define MAX_REQUEST_SIZE 1337
 # include "webserv.hpp"
 # include "parse_request.hpp"
 # include "parse_config.hpp"
@@ -24,14 +24,16 @@ class request
 		bool									is_reading_chunked;
 
 		int										chunk_size;
+		int										b_size;
 
 		bool			is_reading_new_chunk_part;
 		bool			found_next_hexa;
 
-		std::string	random_file_name_generate();
-		bool	parse_request_data(std::string&, bool&);
-		bool	body_chunked_encoding(std::string&);
-		void	print_request();
+		std::string								url_encoding();
+		std::string								random_file_name_generate();
+		bool									parse_request_data(std::string&, bool&);
+		bool									body_chunked_encoding(std::string&);
+		void									print_request();
 };
 
 bool	valid_method(std::string body);

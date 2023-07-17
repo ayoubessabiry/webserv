@@ -13,7 +13,6 @@ void PostMethod::postProcess()
     if (postIsAllowed)
     {
         fileName = uploadDirectory.append(fileName);
-        std::cout << "l9laaawiiii :" << fileName << std::endl;
         if (canNotOpenFileForWrite())
         {
             std::cerr << "Can't open file : " << fileName << std::endl;
