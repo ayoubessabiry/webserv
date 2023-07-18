@@ -126,7 +126,8 @@ std::string getAutoIndex(const char *dir)
 	{
 		const char *fileWithinDirectory = filesWithinDirectory[i].c_str();
 
-		if (isDirectory(fileWithinDirectory))
+		std::cout << "path ==> " << std::string(dir).append(fileWithinDirectory).c_str() << "\n";
+		if (isDirectory(std::string(dir).append(fileWithinDirectory).c_str()))
 		{
 			autoIndexHtml.append("<i class=\'bx bxs-folder\'></i>");
 		}
