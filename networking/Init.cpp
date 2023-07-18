@@ -57,6 +57,7 @@ void	Init::get_rqst(int ready_client){
 	clients[i].recv_byte += recB;
 	std::string	buff(clients[i].buffer, recB);
 	if(send_request(clients[i], buff)){
+		std::cout << "sending request ...\n";
 		// move ready_client to send();
 		std::cout << "done" << std::endl;
 		std::string host = clients[i].rqst.headers["Host"];
@@ -122,7 +123,7 @@ void	Init::send_response(int ready_client){
 			clients.erase(clients.begin()+i);
 		}
 	}
-	if (clients[i].rqst.method == "POST")
+	else if (clients[i].rqst.method == "POST")
 	{
 		clients[i].post.setBufferSize(MAX_REQUEST_SIZE);
 
@@ -143,6 +144,36 @@ void	Init::send_response(int ready_client){
 			//std::cout << responseBody;
 			clients[i].bytes_sent += s;
 			clients[i].post.setBytesSent(clients[i].bytes_sent);
+			if (s == -1){
+				std::cout << std::strerror(errno) << std::endl;
+				exit(1);
+			}
+		}
+		if (responseBody.empty()){
+			FD_CLR(clients[i].socket, &masterWrite);
+			close(clients[i].socket);
+			clients.erase(clients.begin()+i);
+		}
+	}
+	else if (clients[i].rqst.method == "DELETE")
+	{
+		clients[i].delete_method.setBufferSize(MAX_REQUEST_SIZE);
+
+		clients[i].delete_method.setAllowedMethods(clients[i].desired_location.methods);
+		clients[i].delete_method.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
+		clients[i].delete_method.deleteProcess();
+		/////////////////////////////
+		if (clients[i].header){
+			std::string	responseHeader(clients[i].delete_method.getResponseHeaders());
+			send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
+			clients[i].header = false;	
+		}
+		std::string	responseBody = clients[i].delete_method.getResponseBody();
+		if (!responseBody.empty()){
+			int  s = send(clients[i].socket, responseBody.c_str(), responseBody.size(),  0);
+			//std::cout << responseBody;
+			clients[i].bytes_sent += s;
+			clients[i].delete_method.setBytesSent(clients[i].bytes_sent);
 			if (s == -1){
 				std::cout << std::strerror(errno) << std::endl;
 				exit(1);

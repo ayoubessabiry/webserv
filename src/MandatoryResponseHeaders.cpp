@@ -113,6 +113,7 @@ void MandatoryResponseHeaders::initHttpStatusStrings()
 {
     httpStatusStrings[200] = "OK";
     httpStatusStrings[201] = "Created";
+    httpStatusStrings[202] = "Accepted";
     httpStatusStrings[301] = "Moved Permanently";
     httpStatusStrings[400] = "Bad Request";
     httpStatusStrings[404] = "Not Found";
@@ -123,6 +124,7 @@ void MandatoryResponseHeaders::initHttpStatusStrings()
 void MandatoryResponseHeaders::initHttpStatusFiles()
 {
     httpStatusFiles[201] = "./errors/201.html";
+    httpStatusFiles[202] = "./errors/202.html";
     httpStatusFiles[400] = "./errors/400.html";
     httpStatusFiles[404] = "./errors/404.html";
     httpStatusFiles[405] = "./errors/405.html";

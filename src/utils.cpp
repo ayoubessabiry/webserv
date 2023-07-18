@@ -83,7 +83,6 @@ int isDirectory(const char *path)
 	struct stat statbuf;
 	if (stat(path, &statbuf) != 0)
 		return 0;
-	std::cout << path << std::endl;
 	return S_ISDIR(statbuf.st_mode);
 }
 
@@ -106,6 +105,11 @@ std::vector<std::string> getFileWithinDirectory(const char *dir)
 			fileWithinDirectory.append("/");
 		}
 		filesWithinDirectory.push_back(fileWithinDirectory);
+	}
+	if (closedir(dirp) < 0)
+	{
+		perror("closedir");
+		exit(1);
 	}
 	return filesWithinDirectory;
 }
@@ -212,8 +216,20 @@ bool canNotOpenDirectoryOrSubDirectories(const char *dir)
 		if (isDirectory(subDir.c_str()))
 		{
 			if (canNotOpenDirectoryOrSubDirectories(subDir.c_str()))
+			{
+				if (closedir(dirp) < 0)
+				{
+					perror("closedir");
+					exit(1);
+				}
 				return true;
+			}
 		}
+	}
+	if (closedir(dirp) < 0)
+	{
+		perror("closedir");
+		exit(1);
 	}
 	return false;
 }

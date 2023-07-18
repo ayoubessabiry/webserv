@@ -57,6 +57,8 @@ void DeleteMethod::deleteDirectory()
         else
         {
             deleteDirectoryContent(fileName);
+            StatusCode = 202;
+            setFileNameToFileError();
         }
     }
 }
@@ -65,6 +67,9 @@ void DeleteMethod::deleteFile()
     if (remove(fileName.c_str()) < 0)
     {
         StatusCode = 500;
+        setFileNameToFileError();
+    } else {
+        StatusCode = 202;
         setFileNameToFileError();
     }
 }

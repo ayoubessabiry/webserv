@@ -161,7 +161,7 @@ bool request::parse_request_data(std::string &appended_string, bool &is_reading_
 		return true;
 		status = "400";
 	}
-	if (method == "GET")
+	if (method == "GET" || method == "DELETE")
 		return true;
 
 	if (method == "POST")
