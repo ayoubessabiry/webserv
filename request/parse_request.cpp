@@ -213,6 +213,16 @@ bool	send_request(Client& client, std::string& buff)
 		{
 			ended = client.rqst.body_chunked_encoding(client.request_collector);
 		}
+		if (client.rqst.headers.count("Transfer-Encoding") && client.rqst.headers.count("Content-Length"))
+		{
+			status = "400";
+			return true;
+		}
+		if (client.rqst.headers.count("Transfer-Encoding") && client.rqst.headers.count("Transfer-Encoding") != "chunked")
+		{
+			status = "400";
+			return true;
+		}
 	}
 
 	if (ended)
