@@ -9,6 +9,7 @@ SRC= request/parse_request.cpp \
 	src/PostMethod.cpp\
 	src/utils-map.cpp\
 	src/utils.cpp\
+	src/CGI.cpp\
 	main.cpp\
 	client.cpp\
 

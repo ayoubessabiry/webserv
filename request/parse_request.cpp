@@ -196,8 +196,6 @@ bool	send_request(Client& client, std::string& buff)
 {
 	bool	ended = false;
 
-	std::cout << buff;
-
 	if (client.is_reading_body)
 		client.request_collector = "";
 	client.request_collector += buff;
@@ -221,7 +219,6 @@ bool	send_request(Client& client, std::string& buff)
 			body_file.flush();
 			int	content_length;
 			std::istringstream(client.rqst.headers["Content-Length"]) >> content_length;
-			// std::cout << content_length << " wana 3ndi " << filesize(client.rqst.file_name.c_str())<< std::endl;
 			if (filesize(client.rqst.file_name.c_str()) >= content_length)
 			{
 				ended = true;
@@ -235,7 +232,6 @@ bool	send_request(Client& client, std::string& buff)
 
 	if (ended)
 	{
-		// client.rqst.print_request();
 		client.is_reading_body = false;
 		std::cout << "\nRequest Ended\n";
 
