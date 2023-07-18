@@ -65,72 +65,59 @@ int	convert_hex_to_decimal(std::string hex_number)
 
 bool request::body_chunked_encoding(std::string &req)
 {
-	int	body_chunk_size = req.size();
-
 	is_reading_new_chunk_part = true;
-	while(body_chunk_size)
+	b_size += req.size();
+	std::fstream	body_file;
+
+	chunk_part += req;
+	while (b_size)
 	{
 		if (!found_next_hexa)
 		{
-			if (is_reading_new_chunk_part)
-				chunk_part += req;
-			if (!strstr(chunk_part.c_str(), "\r\n"))
-				return false;
-			std::size_t find = chunk_part.find("\r\n");
-			next_hex_saver = chunk_part.substr(0, find);
-
-            found_next_hexa = true;
-			chunk_size = convert_hex_to_decimal(chunk_part);
-			if (chunk_size == 0)
+			if (strstr(chunk_part.c_str(), "\r\n"))
 			{
-				found_next_hexa = false;
-				return true ;
-			}
-            chunk_saver = chunk_part.substr(find + 2, chunk_part.size());
-            
-			if (is_reading_new_chunk_part)
-			{
-				if (req.size() > chunk_saver.size())
-					body_chunk_size -= req.size() - chunk_saver.size();
-				else if (req.size() <= chunk_saver.size())
-					body_chunk_size -= chunk_saver.size() - req.size();
+				std::size_t find = chunk_part.find("\r\n");
+				next_hex_saver = chunk_part.substr(0, find);
+				chunk_saver = chunk_part.substr(find + 2, chunk_part.size());
+				chunk_size = convert_hex_to_decimal(next_hex_saver);
+				if (chunk_size == 0)
+				{
+					found_next_hexa = false;
+					return true ;
+				}
+				found_next_hexa = true;
+				is_reading_new_chunk_part = false;
+				b_size -= (next_hex_saver.size() + 2);
 			}
 			else
-			{
-				body_chunk_size -= next_hex_saver.size();
-				body_chunk_size -= 2;
-			}
-			is_reading_new_chunk_part = false;
+				return false;
 		}
 		if (found_next_hexa)
 		{
-			std::fstream	body_file;
 			body_file.open(file_name.c_str(), 
-							std::ios_base::binary|std::ios_base::out|
-							std::ios_base::app);
+				std::ios_base::binary|std::ios_base::out|std::ios_base::app);
 
 			if (is_reading_new_chunk_part)
+			{
+				b_size += chunk_saver.size();
 				chunk_saver += req;
-			int body_subtract = chunk_saver.size();
+			}
 			if (chunk_saver.size() >= chunk_size)
 			{
 				std::string chunk = chunk_saver;
-				chunk_part = chunk.substr(chunk_size, chunk_saver.size());
-                chunk_saver = chunk.substr(0, chunk_size);
-                body_file << chunk_saver;
-				if (is_reading_new_chunk_part)
-					body_subtract = chunk_saver.size() - chunk_size;
-            	found_next_hexa = false;
-			}
-			body_chunk_size -=  body_subtract;
+				chunk_part = chunk.substr(chunk_size + 2, chunk_saver.size());
 
+				chunk_saver = chunk.substr(0, chunk_size);
+
+				found_next_hexa = false;
+				body_file.write(chunk_saver.c_str(), chunk_size);
+			}
+			b_size -= chunk_saver.size();
+			if (b_size <= 0)
+				b_size = 0;
 			is_reading_new_chunk_part = false;
-		
-            if (body_chunk_size <= 0)
-                body_chunk_size = 0;
 		}
 	}
-
 	return false;
 }
 
@@ -178,9 +165,7 @@ bool request::parse_request_data(std::string &appended_string, bool &is_reading_
 		return true;
 
 	if (method == "POST")
-	{
 		is_reading_body = true;
-	}
 
 	return false;
 }
@@ -211,8 +196,7 @@ bool	send_request(Client& client, std::string& buff)
 		std::fstream	body_file;
 
 		body_file.open(client.rqst.file_name.c_str(), std::ios_base::binary|std::ios_base::out|std::ios_base::app);
-	
-		
+
 		if (client.rqst.headers.count("Content-Length"))
 		{
 			body_file << client.request_collector;
@@ -227,6 +211,16 @@ bool	send_request(Client& client, std::string& buff)
 		if (client.rqst.headers.count("Transfer-Encoding"))
 		{
 			ended = client.rqst.body_chunked_encoding(client.request_collector);
+		}
+		if (client.rqst.headers.count("Transfer-Encoding") && client.rqst.headers.count("Content-Length"))
+		{
+			status = "400";
+			return true;
+		}
+		if (client.rqst.headers.count("Transfer-Encoding") && client.rqst.headers.count("Transfer-Encoding") != "chunked")
+		{
+			status = "400";
+			return true;
 		}
 	}
 

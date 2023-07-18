@@ -43,7 +43,5 @@ location_block Client::match_location()
         }
         matching_size = 0;
     }
-    if (!match)
-        location_index = 0;
     return configuration.locations[location_index];
 }

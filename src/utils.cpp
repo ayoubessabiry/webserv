@@ -6,7 +6,7 @@
 /*   By: adbaich <adbaich@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/01 13:46:24 by adbaich           #+#    #+#             */
-/*   Updated: 2023/07/14 18:06:48 by adbaich          ###   ########.fr       */
+/*   Updated: 2023/07/15 21:55:03 by adbaich          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,23 +78,12 @@ void string_toupper(std::string &x)
 		x[i] = toupper(x[i]);
 }
 
-// void ft_error(const char *file_err, int i, _MAP types_map)
-// {
-
-// 	std::string root("/Users/adbaich/Desktop/test/errors/");
-// 	std::string tmp(root);
-
-// 	tmp.append(file_err);
-// 	std::string extension = get_ext(tmp);
-// 	ft_get(tmp.c_str(), i, types_map, extension);
-// }
-
 int isDirectory(const char *path)
 {
-
 	struct stat statbuf;
 	if (stat(path, &statbuf) != 0)
 		return 0;
+	std::cout << path << std::endl;
 	return S_ISDIR(statbuf.st_mode);
 }
 
@@ -126,13 +115,24 @@ std::string getAutoIndex(const char *dir)
 	std::vector<std::string> filesWithinDirectory = getFileWithinDirectory(dir);
 
 	std::string autoIndexHtml;
-	autoIndexHtml.append("<!DOCTYPE html> <html> <head><h1>Auto Index</h1><title>Webserv</title></head><body>\n");
+	autoIndexHtml.append("<!DOCTYPE html> <html> <head><h1>Auto Index</h1>"
+	"<title>Webserv</title>"
+	"<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'></head><body>\n");
 	for (size_t i = 0; i < filesWithinDirectory.size(); i++)
 	{
 		const char *fileWithinDirectory = filesWithinDirectory[i].c_str();
 
+		if (isDirectory(fileWithinDirectory))
+		{
+			autoIndexHtml.append("<i class=\'bx bxs-folder\'></i>");
+		}
+		else
+		{
+			autoIndexHtml.append("<i class=\'bx bxs-file\'></i>");
+		}
 		autoIndexHtml.append("<a href=\"").append(fileWithinDirectory);
-		autoIndexHtml.append("\" >").append(fileWithinDirectory).append("</a><br>\n");
+		autoIndexHtml.append("\" >");
+		autoIndexHtml.append(fileWithinDirectory).append("</a><br>\n");
 	}
 	autoIndexHtml.append("</body></html>\n");
 	return autoIndexHtml;
