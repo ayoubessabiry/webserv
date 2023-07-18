@@ -24,6 +24,10 @@ void	Init::add_client(int new_client){
 	Client	client;
 
 	new_socket = accept(new_client, (sockaddr *)&client.client_add, &client.addr_size);
+	if (new_socket == -1){
+		std::cout << "accept(): "<< std::strerror(errno) << std::endl;
+		exit(1);
+	}
 
 	// client.configuration = server_block[new_client];
 	client.rqst.chunk_part = "";
@@ -91,6 +95,7 @@ void	Init::send_response(int ready_client){
 				FD_CLR(clients[i].socket, &masterWrite);
 				close(clients[i].socket);
 				clients.erase(clients.begin()+i);
+				return ;
 			}
 		}
 		else {
@@ -126,6 +131,7 @@ void	Init::send_response(int ready_client){
 				FD_CLR(clients[i].socket, &masterWrite);
 				close(clients[i].socket);
 				clients.erase(clients.begin()+i);
+				return ;
 			}
 		}
 	}
@@ -158,6 +164,7 @@ void	Init::send_response(int ready_client){
 			FD_CLR(clients[i].socket, &masterWrite);
 			close(clients[i].socket);
 			clients.erase(clients.begin()+i);
+			return ;
 		}
 	}
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbaich <adbaich@student.42.fr>            +#+  +:+       +#+        */
+/*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/01 13:46:24 by adbaich           #+#    #+#             */
-/*   Updated: 2023/07/15 21:55:03 by adbaich          ###   ########.fr       */
+/*   Updated: 2023/07/18 16:33:29 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,6 @@ int isDirectory(const char *path)
 	struct stat statbuf;
 	if (stat(path, &statbuf) != 0)
 		return 0;
-	std::cout << path << std::endl;
 	return S_ISDIR(statbuf.st_mode);
 }
 

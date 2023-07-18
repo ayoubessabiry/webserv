@@ -214,12 +214,12 @@ bool	send_request(Client& client, std::string& buff)
 		}
 		if (client.rqst.headers.count("Transfer-Encoding") && client.rqst.headers.count("Content-Length"))
 		{
-			status = "400";
+
 			return true;
 		}
-		if (client.rqst.headers.count("Transfer-Encoding") && client.rqst.headers.count("Transfer-Encoding") != "chunked")
+		if (client.rqst.headers.count("Transfer-Encoding"))
 		{
-			status = "400";
+
 			return true;
 		}
 	}
@@ -227,8 +227,6 @@ bool	send_request(Client& client, std::string& buff)
 	if (ended)
 	{
 		client.is_reading_body = false;
-		std::cout << "\nRequest Ended\n";
-
 		client.request_collector = "";
 	}
 
