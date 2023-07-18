@@ -9,15 +9,16 @@ SRC= request/parse_request.cpp \
 	src/PostMethod.cpp\
 	src/utils-map.cpp\
 	src/utils.cpp\
+	src/CGI.cpp\
 	main.cpp\
 	client.cpp\
 
-CPPFLAGS= -Wall -Wextra -Werror -std=c++98
+CPPFLAG= -Wall -Wextra -Werror -std=c++98
 NAME = webserv
 all : $(NAME)
 
 $(NAME) : $(SRC)
-	$(CC) $(CPPFLAG) $(SRC) -o $(NAME)
+	$(CC) $(CPPFLAGS) $(SRC) -o $(NAME)
 
 clean : 
 	rm -f $(NAME)

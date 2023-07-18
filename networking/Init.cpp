@@ -24,6 +24,10 @@ void	Init::add_client(int new_client){
 	Client	client;
 
 	new_socket = accept(new_client, (sockaddr *)&client.client_add, &client.addr_size);
+	if (new_socket == -1){
+		std::cout << "accept(): "<< std::strerror(errno) << std::endl;
+		exit(1);
+	}
 
 	// client.configuration = server_block[new_client];
 	client.rqst.chunk_part = "";
@@ -59,7 +63,6 @@ void	Init::get_rqst(int ready_client){
 	if(send_request(clients[i], buff)){
 		std::cout << "sending request ...\n";
 		// move ready_client to send();
-		std::cout << "done" << std::endl;
 		std::string host = clients[i].rqst.headers["Host"];
 		size_t size = host.size();
 		size_t find_dot = host.find(":");
@@ -88,45 +91,54 @@ void	Init::send_response(int ready_client){
 	////////////////////////////
 	if (clients[i].rqst.method == "GET")
 	{
-		clients[i].get.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
-		clients[i].get.setBufferSize(MAX_REQUEST_SIZE);
-		bool	auto_index;
-		if (clients[i].desired_location.auto_index == "on")
-			auto_index = true;
-		if (clients[i].desired_location.auto_index == "off")
-			auto_index = false;
-		clients[i].get.setAutoIndex(auto_index);
-		clients[i].get.setIndexes(clients[i].desired_location.indexes);
-		clients[i].get.setAllowedMethods(clients[i].desired_location.methods);
-		// clients[i].get.setfileName(clients[i].rqst.file_name);
-		clients[i].get.initGetMethod();
-		/////////////////////////////
-		if (clients[i].header){
-			std::string	responseHeader(clients[i].get.getResponseHeaders());
-			send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
-			clients[i].header = false;	
-		}
-		std::string	responseBody = clients[i].get.getResponseBody();
-		if (!responseBody.empty()){
-			int  s = send(clients[i].socket, responseBody.c_str(), responseBody.size(),  0);
-			//std::cout << responseBody;
-			clients[i].bytes_sent += s;
-			clients[i].get.setBytesSent(clients[i].bytes_sent);
-			if (s == -1){
-				std::cout << std::strerror(errno) << std::endl;
-				exit(1);
+		if(CGI.check_cgi(clients[i])){
+			if(!CGI.send_cgi_response(clients[i])){
+				FD_CLR(clients[i].socket, &masterWrite);
+				close(clients[i].socket);
+				clients.erase(clients.begin()+i);
+				return ;
 			}
 		}
-		if (responseBody.empty()){
-			FD_CLR(clients[i].socket, &masterWrite);
-			close(clients[i].socket);
-			clients.erase(clients.begin()+i);
+		else {
+			clients[i].get.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
+			clients[i].get.setBufferSize(MAX_REQUEST_SIZE);
+			bool	auto_index;
+			if (clients[i].desired_location.auto_index == "on")
+				auto_index = true;
+			if (clients[i].desired_location.auto_index == "off")
+				auto_index = false;
+			clients[i].get.setAutoIndex(auto_index);
+			clients[i].get.setIndexes(clients[i].desired_location.indexes);
+			clients[i].get.setAllowedMethods(clients[i].desired_location.methods);
+			clients[i].get.initGetMethod();
+			/////////////////////////////
+			if (clients[i].header){
+				std::string	responseHeader(clients[i].get.getResponseHeaders());
+				send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
+				clients[i].header = false;	
+			}
+			std::string	responseBody = clients[i].get.getResponseBody();
+			if (!responseBody.empty()){
+				int  s = send(clients[i].socket, responseBody.c_str(), responseBody.size(),  0);
+				//std::cout << responseBody;
+				clients[i].bytes_sent += s;
+				clients[i].get.setBytesSent(clients[i].bytes_sent);
+				if (s == -1){
+					std::cout << std::strerror(errno) << std::endl;
+					exit(1);
+				}
+			}
+			if (responseBody.empty()){
+				FD_CLR(clients[i].socket, &masterWrite);
+				close(clients[i].socket);
+				clients.erase(clients.begin()+i);
+				return ;
+			}
 		}
 	}
 	else if (clients[i].rqst.method == "POST")
 	{
 		clients[i].post.setBufferSize(MAX_REQUEST_SIZE);
-
 		clients[i].post.setAllowedMethods(clients[i].desired_location.methods);
 		clients[i].post.setfileName(clients[i].rqst.uri);
 		clients[i].post.setUploadDirectory(clients[i].desired_location.upload);
@@ -153,6 +165,7 @@ void	Init::send_response(int ready_client){
 			FD_CLR(clients[i].socket, &masterWrite);
 			close(clients[i].socket);
 			clients.erase(clients.begin()+i);
+			return ;
 		}
 	}
 	else if (clients[i].rqst.method == "DELETE")

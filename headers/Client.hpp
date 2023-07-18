@@ -1,6 +1,6 @@
 #ifndef CLIENT_HPP_GARD
 # define CLIENT_HPP_GARD
-# define MAX_REQUEST_SIZE 1337
+# define MAX_REQUEST_SIZE 65535
 # include "webserv.hpp"
 # include "parse_request.hpp"
 # include "parse_config.hpp"
@@ -56,6 +56,7 @@ public :
 	server_block		configuration;
 	location_block		desired_location;
 	size_t 				bytes_sent;
+	size_t				fileSize;
 	ssize_t				recv_byte;
 	ssize_t				header_byte;
 	ssize_t				body_byte;

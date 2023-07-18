@@ -6,7 +6,7 @@
 /*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 10:17:07 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/13 15:05:14 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/17 10:43:19 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 # include "Server.hpp"
 # include "parse_request.hpp"
 # include "parse_config.hpp"
+# include "CGI.hpp"
 
 /*
 
@@ -35,6 +36,7 @@ public:
 	fd_set				masterWrite;
 	fd_set				read;
 	fd_set				write;
+	CGI					CGI;
 	int					max_Rsocket;
 	int					max_Wsocket;
 
@@ -54,13 +56,13 @@ public:
 		FD_SET(s._socket, &masterRead);
 		(s._socket > max_Rsocket) ? max_Rsocket = s._socket : max_Rsocket;
 	}
-	void	start_listening();
-	void	read_socket(int ready_client);
-	void	write_socket(int ready_client);
-	int		wait_clients(fd_set ready, int max_sock);
-	void	add_client(int new_client);
-	void	get_rqst(int ready_client);
-	void	send_response(int ready_client);
+	void		start_listening();
+	void		read_socket(int ready_client);
+	void		write_socket(int ready_client);
+	int			wait_clients(fd_set ready, int max_sock);
+	void		add_client(int new_client);
+	void		get_rqst(int ready_client);
+	void		send_response(int ready_client);
 
 };
 
