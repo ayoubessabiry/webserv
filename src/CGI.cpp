@@ -110,7 +110,6 @@ bool	CGI::send_cgi_response(Client& client){
 			status = stoi(s.substr(8, 3));
 			status_msg = s.substr(11, s.find("\r\n"));
 			if (status >= 400){
-				std::cout << "here" << std::endl;
 				client.get.setStatusCode(status);
 				client.get.setFileNameToFileError();
 				cgi_response_file = client.get.getFileName();

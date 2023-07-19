@@ -91,6 +91,7 @@ void	Init::send_response(int ready_client){
 	if (clients[i].rqst.method == "GET")
 	{
 		clients[i].get.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
+		clients[i].get.setUri(clients[i].rqst.uri);
 		clients[i].get.setBufferSize(MAX_REQUEST_SIZE);
 		bool	auto_index;
 		if (clients[i].desired_location.auto_index == "on")
