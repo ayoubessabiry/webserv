@@ -32,6 +32,7 @@ void MandatoryResponseHeaders::setResponseHeaders()
     {
         setLocationRedirectionHeader();
         responseHeaders.append(locationRedirectionHeader);
+        locationRedirectionPath.clear();
     }
     setDate();
     responseHeaders.append(date);

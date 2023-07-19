@@ -27,7 +27,7 @@ public:
 
 	bool		check_cgi(Client& client);
 	void		set_env(request& request);
-	void		exec_cgi(std::string);
+	void		exec_cgi(std::string filename, Client& client);
 	void		get_uri_info(std::string& uri);
 	void		convert_map_to_char();
 	bool		send_cgi_response(Client& clinet);

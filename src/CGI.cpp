@@ -44,7 +44,7 @@ bool	CGI::check_cgi(Client& client){
 	ENV["REMOTE_ADDR"] = client.configuration.host;
 	ENV["REDIRECT_STATUS"] = "true";
 	set_env(client.rqst);
-	exec_cgi(filename);
+	exec_cgi(filename, client);
 	return true;
 }
 
@@ -95,6 +95,7 @@ bool	CGI::send_cgi_response(Client& client){
 	char		r[MAX_REQUEST_SIZE];
 
 	file.open(cgi_file_name, std::ios_base::in | std::ios_base::out);
+	file.seekg(client.bytes_sent);
 	file.read(r, MAX_REQUEST_SIZE);
 	std::string read(r, file.gcount());
 	if (client.header){
@@ -133,11 +134,11 @@ bool	CGI::send_cgi_response(Client& client){
 	return true;
 }
 
-void CGI::exec_cgi(std::string filename) {
+void CGI::exec_cgi(std::string filename, Client& client) {
 	char **args = new char*[3];
 	cgi_file_name = random_name();
 	int	fd = open(cgi_file_name.c_str(), O_CREAT | O_RDWR, 0644);
-	args[0] = strdup("/Users/aessabir/Desktop/webserv/cgi/php-cgi");
+	args[0] = strdup(client.desired_location.cgi_exec.c_str());
 	args[1] = strdup(filename.c_str());
 	args[2] = 0;
     int id = fork();
