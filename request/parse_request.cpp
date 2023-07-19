@@ -63,6 +63,35 @@ int	convert_hex_to_decimal(std::string hex_number)
 	return num;
 }
 
+std::string url_encoding(std::string uri)
+{
+    std::string url = "";
+    for (int i = 0 ; i < uri.size(); i++)
+    {
+        
+        if (uri[i] == ' ' || uri[i] == '!' 
+			|| uri[i] == '\\' || uri[i] == '#' 
+			|| uri[i] == '$' || uri[i] == '%' 
+			|| uri[i] == '&' || uri[i] == '\"'
+			|| uri[i] == '+'|| uri[i] == '*'
+			|| uri[i] == ','|| uri[i] == ';'
+			|| uri[i] == ':'|| uri[i] == '_'
+			|| uri[i] == '('|| uri[i] == ')'
+			|| uri[i] == '{'|| uri[i] == '}'
+			|| uri[i] == '~'|| uri[i] == '^'
+			|| uri[i] == '<'|| uri[i] == '>'
+			|| uri[i] == '=')
+        {
+            std::stringstream    stream;
+            stream << std::hex << (int)uri[i];
+            url += "%" + std::string(stream.str());
+        }
+		else
+        	url += uri[i];
+    }
+    return url;
+}
+
 bool request::body_chunked_encoding(std::string &req)
 {
 	is_reading_new_chunk_part = true;
