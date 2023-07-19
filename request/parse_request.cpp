@@ -244,12 +244,7 @@ bool	send_request(Client& client, std::string& buff)
 		}
 		if (client.rqst.headers.count("Transfer-Encoding") && client.rqst.headers.count("Content-Length"))
 		{
-
-			return true;
-		}
-		if (client.rqst.headers.count("Transfer-Encoding"))
-		{
-
+			client.rqst.status = "400";
 			return true;
 		}
 	}
