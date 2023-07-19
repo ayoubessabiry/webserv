@@ -16,25 +16,18 @@ location_block Client::match_location()
 {
     int     location_index = 0;
     int     matching_size = 0, max_matching_size = -1;
-    bool    match = false;
 
     for (int i = 0; i < configuration.locations.size(); i++)
     {
         if (configuration.locations[i].prefix == "/")
             i++;
-        for (int j = 0; i < configuration.locations.size() && j < configuration.locations[i].prefix.size() && j < rqst.uri.size(); j++)
+        for (int j = 0; i < configuration.locations.size()
+            && j < configuration.locations[i].prefix.size()
+            && j < rqst.uri.size()
+            && rqst.uri[j] == configuration.locations[i].prefix[j]; j++)
         {
-            if (configuration.locations[i].prefix[j] == '/' && 
-                configuration.locations[i].prefix.size() <= rqst.uri.size())
-            {
-                match = true;
+            if (configuration.locations[i].prefix[j] == '/')
                 matching_size++;
-            }
-            if (configuration.locations[i].prefix[j] != rqst.uri[j])
-            {
-                match = false;
-                break ;
-            }
         }
         if (max_matching_size < matching_size)
         {
@@ -45,3 +38,4 @@ location_block Client::match_location()
     }
     return configuration.locations[location_index];
 }
+
