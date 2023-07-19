@@ -90,6 +90,9 @@ void	Init::send_response(int ready_client){
 	////////////////////////////
 	if (clients[i].rqst.method == "GET")
 	{
+		std::map<int, std::string>::iterator	it;
+		for (it = clients[i].configuration.error_path.begin(); it != clients[i].configuration.error_path.end(); it++)
+			clients[i].get.setHttpStatusFiles(it->first, it->second.c_str());
 		clients[i].get.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
 		clients[i].get.setBufferSize(MAX_REQUEST_SIZE);
 		bool	auto_index;

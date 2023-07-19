@@ -5,6 +5,7 @@ bool	check_if_directive_valid_in_server(std::string directive)
 	return  directive == "listen" ||
 			directive == "host" ||
 			directive == "server_name" ||
+			directive == "error" ||
 			directive == "location";
 }
 
@@ -118,6 +119,7 @@ void webserver::parse_server_block(std::string config_file_data)
 			server.host.clear();
 			server.server_name.clear();
 			server.port.clear();
+			server.error_path.clear();
 			server.locations.clear();
 			if (config_tokens[i] == "server" && config_tokens[i + 1] == "{")
 			{
@@ -126,7 +128,7 @@ void webserver::parse_server_block(std::string config_file_data)
 			}
 			else
 			{
-				std::cout << "ERROR\n";
+				std::cout << "ERReOR\n";
 				parse_state = false;
 				return ;
 			}
@@ -177,12 +179,12 @@ void webserver::parse_server_block(std::string config_file_data)
 				}
 				if (config_tokens[i] != ";")
 				{
-					std::cout << "ERROR\n";
+					std::cout << "ERRORtt\n";
 					return ;
 				}
 				if (!check_if_port_valid(config_tokens[i]) && config_tokens[i] != ";")
 				{
-					std::cout << "ERROR\n";
+					std::cout << "ERRORe\n";
 					parse_state = false;
 					return ;
 				}	
@@ -211,6 +213,25 @@ void webserver::parse_server_block(std::string config_file_data)
 				
 				server.server_name = server_name;
 			}
+			if (config_tokens[i] == "error")
+			{
+				i++;
+				if (!check_if_port_valid(config_tokens[i]))
+				{
+					std::cout << "Error" << std::endl;
+					parse_state = false;
+					return;
+				}
+				int	error_num = std::stoi(config_tokens[i++]);
+				std::string error_path = config_tokens[i++];
+				server.error_path.insert(std::make_pair<int, std::string>(error_num, error_path));
+				if (config_tokens[i] != ";")
+				{
+					std::cout << "Error" << std::endl;
+					parse_state = false;
+					return;
+				}
+			}
 			// Necessary block location
 			if (config_tokens[i] == "location")
 			{
@@ -223,7 +244,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				}
 				else
 				{
-					std::cout << "ERROR\n";
+					std::cout << "EeRROR\n";
 					parse_state = false;
 					return ;
 				}
@@ -251,14 +272,6 @@ void webserver::parse_server_block(std::string config_file_data)
 					i++;
 				}	
 			}
-			if (config_tokens[i] == "error")
-			{
-				i++;
-				while (config_tokens[i] != ";")
-				{
-					location.errors.push_back(config_tokens[i++]);
-				}
-			}
 			if (config_tokens[i] == "auto_index")
 			{
 				i++;
@@ -271,7 +284,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				}
 				if (config_tokens[i] != ";")
 				{
-					std::cout << "ERROR" << std::endl;
+					std::cout << "EeRROR" << std::endl;
 					parse_state = false;
 					return ;
 				}
@@ -282,7 +295,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				location.client_max_body_size = config_tokens[i++];
 				if (config_tokens[i] != ";")
 				{
-					std::cout << "ERROR" << std::endl;
+					std::cout << "ERROR tt" << std::endl;
 					parse_state = false;
 					return ;
 				}
@@ -293,7 +306,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				location.upload = config_tokens[i++];
 				if (config_tokens[i] != ";")
 				{
-					std::cout << "ERROR" << std::endl;
+					std::cout << "ERROR tt" << std::endl;
 					parse_state = false;
 					return ;
 				}
@@ -304,7 +317,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				location.cgi_exec = config_tokens[i++];
 				if (config_tokens[i] != ";")
 				{
-					std::cout << "ERROR" << std::endl;
+					std::cout << "EeRROR" << std::endl;
 					parse_state = false;
 					return ;
 				}
@@ -315,7 +328,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				location.cgi_path = config_tokens[i++];
 				if (config_tokens[i] != ";")
 				{
-					std::cout << "ERROR" << std::endl;
+					std::cout << "EeRROR" << std::endl;
 					parse_state = false;
 					return ;
 				}
@@ -327,7 +340,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				location.redirect.push_back(config_tokens[i++]);
 				if (config_tokens[i] != ";")
 				{
-					std::cout << "ERROR" << std::endl;
+					std::cout << "EeRROR" << std::endl;
 					parse_state = false;
 					return ;
 				}
@@ -373,7 +386,6 @@ void webserver::parse_server_block(std::string config_file_data)
 				location.client_max_body_size.clear();
 				location.indexes.clear();
 				location.methods.clear();
-				location.errors.clear();
 				location.root.clear();
 				root_directive_numbers = 0;
 			}

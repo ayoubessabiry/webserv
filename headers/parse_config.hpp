@@ -31,7 +31,6 @@ struct location_block
 	std::string					auto_index;
 	std::vector<std::string>	redirect;
 	std::vector<std::string>	indexes;
-	std::vector<std::string>	errors;
 	std::vector<std::string>	methods;
 };
 
@@ -40,6 +39,7 @@ struct server_block
 	std::string					host;
 	std::string					server_name;
 	std::string					port;
+	std::map<int, std::string>	error_path;
 	std::vector<location_block>	locations;
 };
 
