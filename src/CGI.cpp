@@ -6,7 +6,7 @@
 /*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:37:15 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/19 10:51:51 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/19 13:02:36 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void	CGI::set_env(request& request){
 }
 
 bool	CGI::check_cgi(Client& client){
-	std::string filename = client.desired_location.root + get_file_name(client.rqst.uri);
+	std::string filename = client.get.getFileName();
 	if (get_ext(filename) != "php")
 		return false;
 	ENV["SERVER_PORT"] = client.configuration.port;
@@ -57,7 +57,6 @@ void	CGI::convert_map_to_char(){
 		env[i] = new char[it->first.size() + it->second.size() + 2];
 		env[i] = const_cast<char *>((it->first + "=" + it->second).c_str());
 		env[i][it->first.size() + it->second.size()] = '\0';
-		// std::cout << env[i] << std::endl;
 		++i;
 	}
 	env[i] = 0;
@@ -90,12 +89,12 @@ size_t calculateFile(const std::string &fileName)
 
 bool	CGI::send_cgi_response(Client& client){
 	std::fstream file;
+	std::fstream file1;
 	std::string	 s;
 	std::string  status_msg;
 	char		r[MAX_REQUEST_SIZE];
 
 	file.open(cgi_file_name, std::ios_base::in | std::ios_base::out);
-	file.seekg(client.bytes_sent);
 	file.read(r, MAX_REQUEST_SIZE);
 	std::string read(r, file.gcount());
 	if (client.header){
@@ -112,24 +111,26 @@ bool	CGI::send_cgi_response(Client& client){
 			status_msg = s.substr(11, s.find("\r\n"));
 			if (status >= 400){
 				std::cout << "here" << std::endl;
-				file.close();
-				cgi_file_name = "/Users/aessabir/Desktop/webserv/errors/404.html";
-				file.open(cgi_file_name, std::ios_base::in | std::ios_base::out);
-				file.read(r, MAX_REQUEST_SIZE);
-				std::string read(r, file.gcount());
-				client.fileSize = calculateFile(cgi_file_name);
+				client.get.setStatusCode(status);
+				client.get.setFileNameToFileError();
+				cgi_response_file = client.get.getFileName();
 			}
 		}
 		std::string response = "HTTP/1.1 "+std::to_string(status)+std::string(status_msg)+"\r\nContent-Length: " + std::to_string(client.fileSize - s.size()) + "\r\n";
 		send(client.socket, response.c_str(), response.size(), 0);
 		client.header = false;
+		if (status >= 400)
+			return true;
 	}
-	if (client.bytes_sent >= client.fileSize){
-		// unlink(cgi_file_name.c_str());
-		return false;
+	cgi_response_file = cgi_file_name + "_res";
+	file1.open(cgi_response_file, std::ios_base::binary|std::ios_base::out|std::ios_base::app);
+	read = read.substr(s.size(), read.size());
+	file1 << read;
+	file1.seekg(read.size());
+	while (std::getline(file, read)){
+		file1 << read;
 	}
-	client.bytes_sent += send(client.socket, read.c_str(), read.size(), 0);
-	// unlink(cgi_file_name.c_str());
+	file1.close();
 	return true;
 }
 

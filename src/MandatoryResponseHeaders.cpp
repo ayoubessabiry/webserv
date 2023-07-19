@@ -170,9 +170,11 @@ const std::string MandatoryResponseHeaders::getResponseHeaders()
 }
 void MandatoryResponseHeaders::setResponseBody()
 {
-    if (autoIndex && !autoIndexFile.empty())
+
+    if (autoIndex && !autoIndexFile.empty() && responseBody.empty())
     {
         responseBody = autoIndexFile;
+        autoIndexFile.clear();
     }
     else
     {

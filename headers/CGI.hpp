@@ -6,7 +6,7 @@
 /*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:33:54 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/18 14:13:54 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/19 12:31:34 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ public:
 	std::map<std::string, std::string>	ENV;
 	std::string							header;
 	std::string							cgi_file_name;
+	std::string							cgi_response_file;
 	int									status;
 	char								**env;
 

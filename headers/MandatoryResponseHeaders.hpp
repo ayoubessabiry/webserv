@@ -46,7 +46,6 @@ protected:
 	void setDate();		   //
 	void setResponseHeaders();
 	void setLocationRedirectionHeader();
-	void setFileNameToFileError();
 	void setResponseBody();
 
 	/*
@@ -54,8 +53,11 @@ protected:
 	*/
 
 public:
+	void setFileNameToFileError();
 	const std::string getResponseHeaders();
 	const std::string getResponseBody();
+	const std::string getFileName() {return fileName;}
+
 
 	/*
 	** --------------------------------- SETTERS ----------------------------------
