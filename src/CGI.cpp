@@ -6,7 +6,7 @@
 /*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:37:15 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/18 15:26:04 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/19 10:32:30 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,6 +109,9 @@ bool	CGI::send_cgi_response(Client& client){
 		}
 		else{
 			status = stoi(s.substr(8, 3));
+			if (status >= 400){
+				// set cgi_file_name to error page;
+			}
 		}
 		client.header = false;
 	}
@@ -125,7 +128,6 @@ void CGI::exec_cgi(std::string filename) {
 	char **args = new char*[3];
 	cgi_file_name = random_name();
 	int	fd = open(cgi_file_name.c_str(), O_CREAT | O_RDWR, 0644);
-
 	args[0] = strdup("/Users/aessabir/Desktop/webserv/cgi/php-cgi");
 	args[1] = strdup(filename.c_str());
 	args[2] = 0;

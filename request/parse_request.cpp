@@ -116,6 +116,7 @@ bool request::body_chunked_encoding(std::string &req)
 			if (b_size <= 0)
 				b_size = 0;
 			is_reading_new_chunk_part = false;
+			body_file.close();
 		}
 	}
 	return false;

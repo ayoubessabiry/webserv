@@ -61,7 +61,6 @@ void	Init::get_rqst(int ready_client){
 	clients[i].recv_byte += recB;
 	std::string	buff(clients[i].buffer, recB);
 	if(send_request(clients[i], buff)){
-		std::cout << "sending request ...\n";
 		// move ready_client to send();
 		std::string host = clients[i].rqst.headers["Host"];
 		size_t size = host.size();
@@ -124,7 +123,7 @@ void	Init::send_response(int ready_client){
 				clients[i].bytes_sent += s;
 				clients[i].get.setBytesSent(clients[i].bytes_sent);
 				if (s == -1){
-					std::cout << std::strerror(errno) << std::endl;
+					std::cout << "sending() : "<< std::strerror(errno) << std::endl;
 					exit(1);
 				}
 			}
