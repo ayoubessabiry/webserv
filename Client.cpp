@@ -24,7 +24,10 @@ location_block Client::match_location()
     {
         if (configuration.locations[i].prefix == "/")
             i++;
-        for (int j = 1; rqst.uri[j] == configuration.locations[i].prefix[j]
+        if (i >= configuration.locations.size())
+            break ;
+        for (int j = 1; j < configuration.locations[i].prefix.size()
+            && rqst.uri[j] == configuration.locations[i].prefix[j]
             && rqst.uri >= configuration.locations[i].prefix ; j++)
         {
             if (configuration.locations[i].prefix[j] == '/')
