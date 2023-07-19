@@ -6,7 +6,7 @@
 /*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:37:15 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/19 10:32:30 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/19 10:51:51 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@ size_t calculateFile(const std::string &fileName)
 bool	CGI::send_cgi_response(Client& client){
 	std::fstream file;
 	std::string	 s;
+	std::string  status_msg;
 	char		r[MAX_REQUEST_SIZE];
 
 	file.open(cgi_file_name, std::ios_base::in | std::ios_base::out);
@@ -104,23 +105,31 @@ bool	CGI::send_cgi_response(Client& client){
 		std::size_t find = s.find("Status: ");
 		if(find == std::string::npos){
 			status = 200;
-			std::string response = "HTTP/1.1 200 OK\r\nContent-Length: " + std::to_string(client.fileSize - s.size()) + "\r\n";
-			send(client.socket, response.c_str(), response.size(), 0);
+			status_msg = " ok";
 		}
 		else{
 			status = stoi(s.substr(8, 3));
+			status_msg = s.substr(11, s.find("\r\n"));
 			if (status >= 400){
-				// set cgi_file_name to error page;
+				std::cout << "here" << std::endl;
+				file.close();
+				cgi_file_name = "/Users/aessabir/Desktop/webserv/errors/404.html";
+				file.open(cgi_file_name, std::ios_base::in | std::ios_base::out);
+				file.read(r, MAX_REQUEST_SIZE);
+				std::string read(r, file.gcount());
+				client.fileSize = calculateFile(cgi_file_name);
 			}
 		}
+		std::string response = "HTTP/1.1 "+std::to_string(status)+std::string(status_msg)+"\r\nContent-Length: " + std::to_string(client.fileSize - s.size()) + "\r\n";
+		send(client.socket, response.c_str(), response.size(), 0);
 		client.header = false;
 	}
 	if (client.bytes_sent >= client.fileSize){
-		unlink(cgi_file_name.c_str());
+		// unlink(cgi_file_name.c_str());
 		return false;
 	}
 	client.bytes_sent += send(client.socket, read.c_str(), read.size(), 0);
-	unlink(cgi_file_name.c_str());
+	// unlink(cgi_file_name.c_str());
 	return true;
 }
 
