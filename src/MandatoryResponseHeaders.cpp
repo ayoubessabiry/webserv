@@ -30,6 +30,7 @@ void MandatoryResponseHeaders::setResponseHeaders()
     }
     else
     {
+        setLocationRedirectionHeader();
         responseHeaders.append(locationRedirectionHeader);
     }
     setDate();
@@ -170,7 +171,6 @@ const std::string MandatoryResponseHeaders::getResponseHeaders()
 }
 void MandatoryResponseHeaders::setResponseBody()
 {
-
     if (autoIndex && !autoIndexFile.empty() && responseBody.empty())
     {
         responseBody = autoIndexFile;
@@ -220,5 +220,3 @@ void MandatoryResponseHeaders::setBodyRequestFile(const std::string& f)
 {
     bodyRequestFile = f;
 }
-
-

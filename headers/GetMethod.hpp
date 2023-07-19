@@ -3,6 +3,7 @@
 class GetMethod : public MandatoryResponseHeaders
 {
     std::vector<std::string> indexes;
+    std::string                 uri;
     bool invalidResource;
     bool resourceIsDirectory;
 
@@ -18,6 +19,7 @@ public:
     */
     void initGetMethod();
     void setIndexes(const std::vector<std::string>& a);
+    void setUri(const std::string& a);
 private:
     void setInvalidResource();
     void DirectoryResponse();

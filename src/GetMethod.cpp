@@ -7,11 +7,11 @@ void GetMethod::setInvalidResource()
 
 void GetMethod::DirectoryResponse()
 {
-    if (fileName[fileName.size() - 1] != '/')
+    if (uri[uri.size() - 1] != '/')
     {
-        fileName.append("/");
+        uri.append("/");
         StatusCode = 301;
-        locationRedirectionPath = fileName;
+        locationRedirectionPath = uri;
     }
     else
     {
@@ -64,3 +64,9 @@ void GetMethod::setIndexes(const std::vector<std::string>& a)
 {
     indexes = a;
 }
+
+void GetMethod::setUri(const std::string& a)
+{
+    uri = a;
+}
+
