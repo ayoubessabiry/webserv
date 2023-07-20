@@ -138,6 +138,8 @@ bool request::body_chunked_encoding(std::string &req)
 
 				chunk_saver = chunk.substr(0, chunk_size);
 
+				hole_chunk_size += chunk_saver.size();
+
 				found_next_hexa = false;
 				body_file.write(chunk_saver.c_str(), chunk_size);
 			}

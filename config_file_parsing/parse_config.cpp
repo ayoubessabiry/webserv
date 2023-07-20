@@ -18,8 +18,7 @@ bool	check_if_directive_valid_in_location(std::string directive)
 			directive == "upload" || 
 			directive == "client_max_body_size" ||
 			directive == "return" ||
-			directive == "cgi_exec" ||
-			directive == "cgi_ext";
+			directive == "cgi_bin";
 }
 
 bool	check_if_port_valid(std::string port)
@@ -311,26 +310,18 @@ void webserver::parse_server_block(std::string config_file_data)
 					return ;
 				}
 			}
-			if (config_tokens[i] == "cgi_exec")
+			if (config_tokens[i] == "cgi_bin")
 			{
 				i++;
-				location.cgi_exec = config_tokens[i++];
+				std::string	cgi_extension = config_tokens[i++];
+				std::string cgi_path = config_tokens[i++];
+				location.cgi_bin.insert(std::make_pair<std::string, std::string>(cgi_extension,
+																				  cgi_path));
 				if (config_tokens[i] != ";")
 				{
-					std::cout << "EeRROR" << std::endl;
+					std::cout << "Error" << std::endl;
 					parse_state = false;
-					return ;
-				}
-			}
-			if (config_tokens[i] == "cgi_ext")
-			{
-				i++;
-				location.cgi_path = config_tokens[i++];
-				if (config_tokens[i] != ";")
-				{
-					std::cout << "EeRROR" << std::endl;
-					parse_state = false;
-					return ;
+					return;
 				}
 			}
 			if (config_tokens[i] == "return")

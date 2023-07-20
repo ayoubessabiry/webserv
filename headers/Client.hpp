@@ -25,6 +25,7 @@ class request
 
 		int										chunk_size;
 		int										b_size;
+		int										hole_chunk_size;
 
 		bool			is_reading_new_chunk_part;
 		bool			found_next_hexa;

@@ -34,6 +34,7 @@ void	Init::add_client(int new_client){
 	client.rqst.chunk_saver = "";
 	client.rqst.found_next_hexa = false;
 	client.rqst.b_size = 0;
+	client.rqst.hole_chunk_size = 0;
 	client.rqst.is_reading_chunked = false;
 	client.body_file_opened = false;
 	client.is_reading_body = false;
@@ -86,7 +87,40 @@ void	Init::send_response(int ready_client){
 		++i;
 
 	clients[i].desired_location = clients[i].match_location();
-
+	int	content_length;
+	if (!clients[i].desired_location.client_max_body_size.empty())
+	{
+		if (clients[i].rqst.headers.count("Content-Length"))
+		{
+			std::istringstream(clients[i].rqst.headers["Content-Length"]) >> content_length;
+			if (std::stoi(clients[i].desired_location.client_max_body_size) < content_length)
+			{
+				clients[i].rqst.status = "413";
+				clients[i].get.setStatusCode(std::stoi(clients[i].rqst.status));
+				std::cout << "Body file too large " << std::endl;
+				FD_CLR(clients[i].socket, &masterWrite);
+				close(clients[i].socket);
+				clients.erase(clients.begin()+i);
+				std::remove(clients[i].rqst.file_name.c_str());
+				return ;
+			}
+		}
+		if (clients[i].rqst.headers.count("Transfer-Encoding"))
+		{
+			if (clients[i].rqst.hole_chunk_size > std::stoi(clients[i].desired_location.client_max_body_size))
+			{
+				clients[i].rqst.status = "413";
+				clients[i].get.setStatusCode(std::stoi(clients[i].rqst.status));
+				std::cout << "Body file too large " << std::endl;
+				FD_CLR(clients[i].socket, &masterWrite);
+				close(clients[i].socket);
+				clients.erase(clients.begin()+i);
+				std::remove(clients[i].rqst.file_name.c_str());
+				return ;
+			}
+		}
+	}
+	clients[i].rqst.hole_chunk_size = 0;
 	////////////////////////////
 	if (clients[i].rqst.method == "GET")
 	{
@@ -174,6 +208,7 @@ void	Init::send_response(int ready_client){
 			FD_CLR(clients[i].socket, &masterWrite);
 			close(clients[i].socket);
 			clients.erase(clients.begin()+i);
+			std::remove(clients[i].rqst.file_name.c_str());
 			return ;
 		}
 	}

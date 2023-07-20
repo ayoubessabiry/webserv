@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: smounir <smounir@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:37:15 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/20 18:15:50 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/20 22:43:07 by smounir          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,8 @@ bool	CGI::check_cgi(Client& client){
 		filename = client.get.getFileName();
 	else if (client.rqst.method == "POST")
 		filename = client.post.getFileName();
-	if (get_ext(filename) != client.desired_location.cgi_path || client.desired_location.cgi_exec.empty()){
+	// Doesn't compile setupi cgi blmap cgi_bin ma bghitch n9is lik hadchi
+	if (get_ext(filename) != client.desired_location.cgi_bin.first.c_str() || client.desired_location.cgi_bin.second.c_str()){
 		return false;
 	}
 	ENV["SERVER_PORT"] = client.configuration.port;
@@ -173,7 +174,7 @@ void CGI::exec_cgi(std::string filename, Client& client) {
 	}
 	std::cout << client.rqst.file_name << std::endl;
 	int	fd = open(cgi_file_name.c_str(), O_CREAT | O_RDWR, 0644);
-	args[0] = strdup(client.desired_location.cgi_exec.c_str());
+	args[0] = strdup(client.desired_location.cgi_bin.first.c_str());
 	args[1] = strdup(filename.c_str());
 	args[2] = 0;
 	convert_map_to_char();
