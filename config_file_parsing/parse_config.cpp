@@ -387,6 +387,7 @@ void webserver::parse_server_block(std::string config_file_data)
 				location.indexes.clear();
 				location.methods.clear();
 				location.root.clear();
+				location.redirect.clear();
 				root_directive_numbers = 0;
 			}
 		}

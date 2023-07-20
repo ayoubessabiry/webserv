@@ -93,6 +93,13 @@ void	Init::send_response(int ready_client){
 		std::map<int, std::string>::iterator	it;
 		for (it = clients[i].configuration.error_path.begin(); it != clients[i].configuration.error_path.end(); it++)
 			clients[i].get.setHttpStatusFiles(it->first, it->second.c_str());
+		if (!clients[i].rqst.status.empty())
+			clients[i].get.setStatusCode(std::stoi(clients[i].rqst.status));
+		if (!clients[i].desired_location.redirect.empty())
+		{
+			clients[i].get.setStatusCode(std::stoi(clients[i].desired_location.redirect[0]));
+			clients[i].get.setLocationRedirectionPath(clients[i].desired_location.redirect[1]);
+		}
 		clients[i].get.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
 		clients[i].get.setUri(clients[i].rqst.uri);
 		clients[i].get.setBufferSize(MAX_REQUEST_SIZE);
@@ -114,6 +121,7 @@ void	Init::send_response(int ready_client){
 			std::string	responseHeader(clients[i].get.getResponseHeaders());
 			send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
 			clients[i].header = false;	
+			std::cout << "headers : \n" << responseHeader << std::endl;
 		}
 		std::string	responseBody = clients[i].get.getResponseBody();
 		if (!responseBody.empty()){
