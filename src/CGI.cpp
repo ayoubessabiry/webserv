@@ -6,7 +6,7 @@
 /*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:37:15 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/19 13:02:36 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/20 18:15:50 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,31 +18,51 @@ void	CGI::get_uri_info(std::string& uri){
 	ENV["QUERY_STRING"] = uri.substr(uri.find("?") + 1,uri.size());
 }
 
-std::string	CGI::get_file_name(std::string &uri){
-	ENV["SCRIPT_NAME"] = uri.substr(0,uri.find("?"));
-	return uri.substr(0,uri.find("?"));
+// std::string	CGI::get_file_name(std::string &uri){
+// 	ENV["SCRIPT_NAME"] = 
+// 	return uri.substr(0,uri.find("?"));
+// }
+
+std::string s_toupper(std::string x)
+{
+	for (size_t i = 0; i < x.size(); i++)
+		x[i] = toupper(x[i]);
+	return x;
 }
 
 void	CGI::set_env(request& request){
 	ENV["AUTH_TYPE"] = "";
 	std::map<std::string, std::string>::iterator it = request.headers.find("Content-Length");
 	ENV["CONTENT_LENGTH"] = (it != request.headers.end())? it->second : "";
+	request.headers.erase("Content-Length");
 	it = request.headers.find("Content-Type");
 	ENV["CONTENT_TYPE"] = (it != request.headers.end())? it->second : "";
+	request.headers.erase("Content-Type");
 	ENV["SERVER_PROTOCOL"] = "HTTP/1.1";
 	ENV["REQUEST_METHOD"] = request.method;
-	ENV["REMOTE_HOST"] = "";
+	for(it = request.headers.begin(); it != request.headers.end(); ++it){
+		ENV["HTTP_"+s_toupper(it->first)] = it->second;
+	}
 	get_uri_info(request.uri);
+	//get_file_name(request.uri);
 }
 
 bool	CGI::check_cgi(Client& client){
-	std::string filename = client.get.getFileName();
-	if (get_ext(filename) != "php")
+	std::string filename;
+	if (client.rqst.method == "GET")
+		filename = client.get.getFileName();
+	else if (client.rqst.method == "POST")
+		filename = client.post.getFileName();
+	if (get_ext(filename) != client.desired_location.cgi_path || client.desired_location.cgi_exec.empty()){
 		return false;
+	}
 	ENV["SERVER_PORT"] = client.configuration.port;
 	ENV["SERVER_NAME"] = client.configuration.host;
-	ENV["REMOTE_ADDR"] = client.configuration.host;
 	ENV["REDIRECT_STATUS"] = "true";
+	ENV["SCRIPT_NAME"] = filename;
+	ENV["SCRIPT_FILENAME"] = filename;
+	ENV["PATH_INFO"] = client.desired_location.upload;
+	ENV["UPLOAD_TMP_DIR"] = client.desired_location.upload;
 	set_env(client.rqst);
 	exec_cgi(filename, client);
 	return true;
@@ -54,9 +74,7 @@ void	CGI::convert_map_to_char(){
 	std::map<std::string, std::string>::iterator it;
 	int i = 0;
 	for(it = ENV.begin(); it != ENV.end(); ++it){
-		env[i] = new char[it->first.size() + it->second.size() + 2];
-		env[i] = const_cast<char *>((it->first + "=" + it->second).c_str());
-		env[i][it->first.size() + it->second.size()] = '\0';
+		env[i] = strdup((it->first + "=" + it->second).c_str());
 		++i;
 	}
 	env[i] = 0;
@@ -67,7 +85,7 @@ std::string	random_name()
 	std::string alphas = "abcdefghijklmnopqrstuvwxyz123456789";
 	std::string	file_name = "/tmp/";
 
-	srand(time(0));
+	srand(time(NULL));
 
 	for	(int i = 0 ; i < 13; i++)
 		file_name += alphas[rand() % alphas.size()];
@@ -105,18 +123,29 @@ bool	CGI::send_cgi_response(Client& client){
 		std::size_t find = s.find("Status: ");
 		if(find == std::string::npos){
 			status = 200;
-			status_msg = " ok";
+			status_msg = " OK";
 		}
 		else{
 			status = stoi(s.substr(8, 3));
 			status_msg = s.substr(11, s.find("\r\n"));
+			s = s.substr(s.find("\r\n"),s.size());
 			if (status >= 400){
+				if (client.rqst.method == "GET"){
+					client.get.setStatusCode(status);
+					client.get.setFileNameToFileError();
+				}
+				else if (client.rqst.method == "POST"){
+					client.post.setStatusCode(status);
+					client.post.setFileNameToFileError();
+				}
 				client.get.setStatusCode(status);
 				client.get.setFileNameToFileError();
 				cgi_response_file = client.get.getFileName();
 			}
 		}
 		std::string response = "HTTP/1.1 "+std::to_string(status)+std::string(status_msg)+"\r\nContent-Length: " + std::to_string(client.fileSize - s.size()) + "\r\n";
+		response += s;
+		response += "\r\n\r\n";
 		send(client.socket, response.c_str(), response.size(), 0);
 		client.header = false;
 		if (status >= 400)
@@ -136,18 +165,27 @@ bool	CGI::send_cgi_response(Client& client){
 
 void CGI::exec_cgi(std::string filename, Client& client) {
 	char **args = new char*[3];
-	cgi_file_name = random_name();
+	int	fd_in = 0;
+
+	cgi_file_name = random_name() + "_body";
+	if(client.rqst.method == "POST"){
+		fd_in = open(client.rqst.file_name.c_str(), O_CREAT | O_RDWR, 0644);
+	}
+	std::cout << client.rqst.file_name << std::endl;
 	int	fd = open(cgi_file_name.c_str(), O_CREAT | O_RDWR, 0644);
 	args[0] = strdup(client.desired_location.cgi_exec.c_str());
 	args[1] = strdup(filename.c_str());
 	args[2] = 0;
+	convert_map_to_char();
     int id = fork();
     if (id == 0) {
-		convert_map_to_char();
 		dup2(fd, 1);
+		dup2(fd_in, 0);
         if (execve(args[0], args, env) == -1)
 			std::cerr << "execve() error: " << std::strerror(errno);
     }
+	// usleep(10000);
+    // waitpid(id, &status, WNOHANG);
 	wait(NULL);
 	close(fd);
 }

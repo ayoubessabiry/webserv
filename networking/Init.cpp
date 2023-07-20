@@ -105,18 +105,15 @@ void	Init::send_response(int ready_client){
 		clients[i].get.setIndexes(clients[i].desired_location.indexes);
 		clients[i].get.setAllowedMethods(clients[i].desired_location.methods);
 		clients[i].get.initGetMethod();
-		if(CGI.check_cgi(clients[i])){
+		if(clients[i].header && CGI.check_cgi(clients[i])){
 			CGI.send_cgi_response(clients[i]);
 			clients[i].get.setfileName(CGI.cgi_response_file);
 			clients[i].get.setBufferSize(MAX_REQUEST_SIZE);
 		}
-		else {
-			/////////////////////////////
-			if (clients[i].header){
-				std::string	responseHeader(clients[i].get.getResponseHeaders());
-				send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
-				clients[i].header = false;	
-			}
+		if (clients[i].header){
+			std::string	responseHeader(clients[i].get.getResponseHeaders());
+			send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
+			clients[i].header = false;	
 		}
 		std::string	responseBody = clients[i].get.getResponseBody();
 		if (!responseBody.empty()){
@@ -139,12 +136,18 @@ void	Init::send_response(int ready_client){
 	{
 		clients[i].post.setBufferSize(MAX_REQUEST_SIZE);
 		clients[i].post.setAllowedMethods(clients[i].desired_location.methods);
-		clients[i].post.setfileName(clients[i].rqst.uri);
-		clients[i].post.setUploadDirectory(clients[i].desired_location.upload);
-		clients[i].post.setBodyRequestFile(clients[i].rqst.file_name);
-		clients[i].post.postProcess();
+		clients[i].post.setfileName(clients[i].desired_location.root + clients[i].rqst.uri);
 		/////////////////////////////
+		if(clients[i].header && CGI.check_cgi(clients[i])){
+			CGI.send_cgi_response(clients[i]);
+			clients[i].post.setfileName(CGI.cgi_response_file);
+			clients[i].post.setBufferSize(MAX_REQUEST_SIZE);
+		}
 		if (clients[i].header){
+			clients[i].post.setfileName(clients[i].rqst.uri);
+			clients[i].post.setUploadDirectory(clients[i].desired_location.upload);
+			clients[i].post.setBodyRequestFile(clients[i].rqst.file_name);
+			clients[i].post.postProcess();
 			std::string	responseHeader(clients[i].post.getResponseHeaders());
 			send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
 			clients[i].header = false;	
@@ -182,7 +185,6 @@ void	Init::send_response(int ready_client){
 		std::string	responseBody = clients[i].delete_method.getResponseBody();
 		if (!responseBody.empty()){
 			int  s = send(clients[i].socket, responseBody.c_str(), responseBody.size(),  0);
-			//std::cout << responseBody;
 			clients[i].bytes_sent += s;
 			clients[i].delete_method.setBytesSent(clients[i].bytes_sent);
 			if (s == -1){

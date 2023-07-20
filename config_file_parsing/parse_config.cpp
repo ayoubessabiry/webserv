@@ -19,7 +19,7 @@ bool	check_if_directive_valid_in_location(std::string directive)
 			directive == "client_max_body_size" ||
 			directive == "return" ||
 			directive == "cgi_exec" ||
-			directive == "cgi_path"; 
+			directive == "cgi_ext";
 }
 
 bool	check_if_port_valid(std::string port)
@@ -322,7 +322,7 @@ void webserver::parse_server_block(std::string config_file_data)
 					return ;
 				}
 			}
-			if (config_tokens[i] == "cgi_path")
+			if (config_tokens[i] == "cgi_ext")
 			{
 				i++;
 				location.cgi_path = config_tokens[i++];
