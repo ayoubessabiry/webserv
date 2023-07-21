@@ -154,8 +154,7 @@ void	Init::send_response(int ready_client){
 		if (clients[i].header){
 			std::string	responseHeader(clients[i].get.getResponseHeaders());
 			send(clients[i].socket, responseHeader.c_str(), strlen(responseHeader.c_str()), 0);
-			clients[i].header = false;	
-			std::cout << "headers : \n" << responseHeader << std::endl;
+			clients[i].header = false;
 		}
 		std::string	responseBody = clients[i].get.getResponseBody();
 		if (!responseBody.empty()){
@@ -163,8 +162,10 @@ void	Init::send_response(int ready_client){
 			clients[i].bytes_sent += s;
 			clients[i].get.setBytesSent(clients[i].bytes_sent);
 			if (s == -1){
-				std::cout << "sending() : "<< std::strerror(errno) << std::endl;
-				exit(1);
+				FD_CLR(clients[i].socket, &masterWrite);
+				close(clients[i].socket);
+				clients.erase(clients.begin()+i);
+				return ;
 			}
 		}
 		if (responseBody.empty()){
@@ -200,8 +201,10 @@ void	Init::send_response(int ready_client){
 			clients[i].bytes_sent += s;
 			clients[i].post.setBytesSent(clients[i].bytes_sent);
 			if (s == -1){
-				std::cout << std::strerror(errno) << std::endl;
-				exit(1);
+				FD_CLR(clients[i].socket, &masterWrite);
+				close(clients[i].socket);
+				clients.erase(clients.begin()+i);
+				return ;
 			}
 		}
 		if (responseBody.empty()){
@@ -231,8 +234,10 @@ void	Init::send_response(int ready_client){
 			clients[i].bytes_sent += s;
 			clients[i].delete_method.setBytesSent(clients[i].bytes_sent);
 			if (s == -1){
-				std::cout << std::strerror(errno) << std::endl;
-				exit(1);
+				FD_CLR(clients[i].socket, &masterWrite);
+				close(clients[i].socket);
+				clients.erase(clients.begin()+i);
+				return ;
 			}
 		}
 		if (responseBody.empty()){

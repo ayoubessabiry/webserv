@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smounir <smounir@student.42.fr>            +#+  +:+       +#+        */
+/*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:37:15 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/20 22:43:07 by smounir          ###   ########.fr       */
+/*   Updated: 2023/07/21 10:48:23 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,6 @@
 void	CGI::get_uri_info(std::string& uri){
 	ENV["QUERY_STRING"] = uri.substr(uri.find("?") + 1,uri.size());
 }
-
-// std::string	CGI::get_file_name(std::string &uri){
-// 	ENV["SCRIPT_NAME"] = 
-// 	return uri.substr(0,uri.find("?"));
-// }
 
 std::string s_toupper(std::string x)
 {
@@ -44,7 +39,6 @@ void	CGI::set_env(request& request){
 		ENV["HTTP_"+s_toupper(it->first)] = it->second;
 	}
 	get_uri_info(request.uri);
-	//get_file_name(request.uri);
 }
 
 bool	CGI::check_cgi(Client& client){
@@ -53,8 +47,7 @@ bool	CGI::check_cgi(Client& client){
 		filename = client.get.getFileName();
 	else if (client.rqst.method == "POST")
 		filename = client.post.getFileName();
-	// Doesn't compile setupi cgi blmap cgi_bin ma bghitch n9is lik hadchi
-	if (get_ext(filename) != client.desired_location.cgi_bin.first.c_str() || client.desired_location.cgi_bin.second.c_str()){
+	if (client.desired_location.cgi_bin.find(get_ext(filename)) == client.desired_location.cgi_bin.end()){
 		return false;
 	}
 	ENV["SERVER_PORT"] = client.configuration.port;
@@ -172,9 +165,9 @@ void CGI::exec_cgi(std::string filename, Client& client) {
 	if(client.rqst.method == "POST"){
 		fd_in = open(client.rqst.file_name.c_str(), O_CREAT | O_RDWR, 0644);
 	}
-	std::cout << client.rqst.file_name << std::endl;
 	int	fd = open(cgi_file_name.c_str(), O_CREAT | O_RDWR, 0644);
-	args[0] = strdup(client.desired_location.cgi_bin.first.c_str());
+	std::map<std::string, std::string>::iterator it = client.desired_location.cgi_bin.find(get_ext(filename));
+	args[0] = strdup(it->second.c_str());
 	args[1] = strdup(filename.c_str());
 	args[2] = 0;
 	convert_map_to_char();
@@ -185,8 +178,8 @@ void CGI::exec_cgi(std::string filename, Client& client) {
         if (execve(args[0], args, env) == -1)
 			std::cerr << "execve() error: " << std::strerror(errno);
     }
-	// usleep(10000);
-    // waitpid(id, &status, WNOHANG);
+	// usleep(1000);
+    // waitpid(id, 0, WNOHANG);
 	wait(NULL);
 	close(fd);
 }
