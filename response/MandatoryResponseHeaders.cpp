@@ -120,8 +120,10 @@ void MandatoryResponseHeaders::initHttpStatusStrings()
     httpStatusStrings[400] = "Bad Request";
     httpStatusStrings[404] = "Not Found";
     httpStatusStrings[403] = "Forbidden";
+    httpStatusStrings[409] = "Conflict";
     httpStatusStrings[405] = "Method Not Allowed";
     httpStatusStrings[500] = "Internal Server Error";
+    httpStatusStrings[502] = "Bad Gateway";
 }
 void MandatoryResponseHeaders::initHttpStatusFiles()
 {
@@ -130,8 +132,10 @@ void MandatoryResponseHeaders::initHttpStatusFiles()
     httpStatusFiles[400] = "./errors/400.html";
     httpStatusFiles[404] = "./errors/404.html";
     httpStatusFiles[405] = "./errors/405.html";
+    httpStatusFiles[409] = "./errors/409.html";
     httpStatusFiles[403] = "./errors/403.html";
     httpStatusFiles[500] = "./errors/500.html";
+    httpStatusFiles[502] = "./errors/502.html";
 }
 
 void MandatoryResponseHeaders::setHttpStatusFiles(int	statusCode, const char* path)
