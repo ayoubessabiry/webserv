@@ -6,7 +6,7 @@
 /*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:37:15 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/21 10:48:23 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/21 16:56:53 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,18 @@ bool	CGI::send_cgi_response(Client& client){
 	std::string  status_msg;
 	char		r[MAX_REQUEST_SIZE];
 
+	if (status == 502){
+		if (client.rqst.method == "GET"){
+			client.get.setStatusCode(status);
+			client.get.setFileNameToFileError();
+			cgi_response_file = client.get.getFileName();
+		}
+		else if (client.rqst.method == "POST"){
+			client.post.setStatusCode(status);
+			client.post.setFileNameToFileError();
+			cgi_response_file = client.post.getFileName();
+		}
+	}
 	file.open(cgi_file_name, std::ios_base::in | std::ios_base::out);
 	file.seekg(client.bytes_sent);
 	file.read(r, MAX_REQUEST_SIZE);
@@ -127,14 +139,13 @@ bool	CGI::send_cgi_response(Client& client){
 				if (client.rqst.method == "GET"){
 					client.get.setStatusCode(status);
 					client.get.setFileNameToFileError();
+					cgi_response_file = client.get.getFileName();
 				}
 				else if (client.rqst.method == "POST"){
 					client.post.setStatusCode(status);
 					client.post.setFileNameToFileError();
+					cgi_response_file = client.post.getFileName();
 				}
-				client.get.setStatusCode(status);
-				client.get.setFileNameToFileError();
-				cgi_response_file = client.get.getFileName();
 			}
 		}
 		std::string response = "HTTP/1.1 "+std::to_string(status)+std::string(status_msg)+"\r\nContent-Length: " + std::to_string(client.fileSize - s.size()) + "\r\n";
@@ -178,8 +189,19 @@ void CGI::exec_cgi(std::string filename, Client& client) {
         if (execve(args[0], args, env) == -1)
 			std::cerr << "execve() error: " << std::strerror(errno);
     }
-	// usleep(1000);
-    // waitpid(id, 0, WNOHANG);
-	wait(NULL);
+	// wait(NULL);
+	sleep(1);
+    client.pid_res = waitpid(id, &status, WNOHANG);
+	if (client.pid_res == 0) { 
+		status = 502;
+		kill(id, SIGKILL);
+	}
+	for (int i= 0; i < 2; ++i)
+		delete [] args[i];
+	delete [] args;
+	for (size_t i = 0; i < ENV.size(); ++i){
+		delete [] env[i];
+	}
+	delete [] env;
 	close(fd);
 }

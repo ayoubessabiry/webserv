@@ -6,7 +6,7 @@
 /*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:33:54 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/19 12:31:34 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/21 12:31:36 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 # define CGI_HPP_GARD
 # include "Client.hpp"
 # include "header.hpp"
+# include <csignal>
+# include <unistd.h>
 
 
 class CGI{
