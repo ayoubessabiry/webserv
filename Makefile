@@ -1,28 +1,57 @@
-CC= c++
+# # **************************************************************************** #
+# #                                                                              #
+# #                                                         :::      ::::::::    #
+# #    Makefile                                           :+:      :+:    :+:    #
+# #                                                     +:+ +:+         +:+      #
+# #    By: adbaich <adbaich@student.42.fr>            +#+  +:+       +#+         #
+# #                                                 +#+#+#+#+#+   +#+            #
+# #    Created: 2022/09/27 15:59:12 by adbaich           #+#    #+#              #
+# #    Updated: 2023/07/10 18:41:11 by adbaich          ###   ########.fr        #
+# #                                                                              #
+# # **************************************************************************** #
+
 SRC= request/parse_request.cpp \
 	networking/Init.cpp \
 	networking/server.cpp \
 	config_file_parsing/parse_config.cpp\
-	src/DeleteMethod.cpp\
-	src/GetMethod.cpp\
-	src/MandatoryResponseHeaders.cpp\
-	src/PostMethod.cpp\
-	src/utils-map.cpp\
-	src/utils.cpp\
-	src/CGI.cpp\
+	response/DeleteMethod.cpp\
+	response/GetMethod.cpp\
+	response/MandatoryResponseHeaders.cpp\
+	response/PostMethod.cpp\
+	response/utils-map.cpp\
+	response/utils.cpp\
+	response/CGI.cpp\
 	main.cpp\
-	client.cpp\
+	Client.cpp\
+	
 
-CPPFLAG= -Wall -Wextra -Werror -std=c++98
+OBJDIR = o
+
+SRC_FILES := $(wildcard $(SRC)/%.cpp)
+
+OBJ := $(patsubst %.cpp,$(OBJDIR)/%.o, ${SRC})
+
+CC= c++
+
+#-Wall -Wextra -Werror
+
+CPPFLAGS= -std=c++98
+
 NAME = webserv
-all : $(NAME)
 
-$(NAME) : $(SRC)
-	$(CC) $(CPPFLAGS) $(SRC) -o $(NAME)
+all: ${OBJDIR} ${NAME}
 
-clean : 
-	rm -f $(NAME)
+$(OBJDIR):
+	@mkdir -p $(OBJDIR)
 
-fclean : clean 
+$(OBJDIR)/%.o: %.cpp
+	@${CC} ${CPPFLAGS} -c $< -o $@
 
-re : fclean all
+${NAME}: ${OBJ}
+	@${CC} ${CPPFLAGS} ${OBJ} -o ${NAME}
+
+clean:
+	@rm -f ${OBJ}
+fclean: clean
+	@rm -f ${NAME}
+re: fclean all

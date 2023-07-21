@@ -22,7 +22,9 @@ int		Init::wait_clients(fd_set	ready, int max_sock){
 void	Init::add_client(int new_client){
 	int		new_socket;
 	Client	client;
+	int			a;
 
+	a = 1;
 	new_socket = accept(new_client, (sockaddr *)&client.client_add, &client.addr_size);
 	if (new_socket == -1){
 		std::cout << "accept(): "<< std::strerror(errno) << std::endl;
@@ -31,8 +33,12 @@ void	Init::add_client(int new_client){
 	if (fcntl(new_socket, F_SETFL, O_NONBLOCK) == -1){
 		std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
 	}
-
-	// client.configuration = server_block[new_client];
+	if (setsockopt(new_socket, SOL_SOCKET, SO_REUSEADDR, &a, sizeof(int)) < 0){
+		std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+	}
+	if (setsockopt(new_socket, SOL_SOCKET, SO_NOSIGPIPE, &a, sizeof(int)) < 0){
+		std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+	}
 	client.rqst.chunk_part = "";
 	client.rqst.chunk_saver = "";
 	client.rqst.found_next_hexa = false;
