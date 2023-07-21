@@ -28,6 +28,9 @@ void	Init::add_client(int new_client){
 		std::cout << "accept(): "<< std::strerror(errno) << std::endl;
 		exit(1);
 	}
+	if (fcntl(new_socket, F_SETFL, O_NONBLOCK) == -1){
+		std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+	}
 
 	// client.configuration = server_block[new_client];
 	client.rqst.chunk_part = "";
@@ -45,6 +48,7 @@ void	Init::add_client(int new_client){
 	client.bytes_sent = 0;
 	client.recv_byte = 0;
 	client.header = true;
+	client.pid_res = 1;
 
 	clients.push_back(client);
 	FD_SET(new_socket, &masterRead);

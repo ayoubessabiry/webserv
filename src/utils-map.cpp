@@ -129,6 +129,7 @@ static void insert_in_map(std::string line, _MAP &types_map)
 		}
 		token = strtok(NULL, " \t");
 	}
+	free(line_tmp);
 }
 
 std::string	getContentTypeOfExt(_MAP& types_map, std::string &ext)

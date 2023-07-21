@@ -64,6 +64,7 @@ public :
 	bool				header;
 	char				buffer[MAX_REQUEST_SIZE];
 	int					socket;
+	int					pid_res;
 	location_block		match_location();
 };
 
