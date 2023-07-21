@@ -168,6 +168,12 @@ void webserver::parse_server_block(std::string config_file_data)
 			{
 				i++;
 				port_directive_numbers++;
+				if (config_tokens[i].size() > 4)
+				{
+					std::cout << "Error: Port is invalid !!" << std::endl;
+					parse_state = false;
+					return ;
+				}
 				if (check_if_port_valid(config_tokens[i]))
 					server.port = (config_tokens[i++]);
 				else
