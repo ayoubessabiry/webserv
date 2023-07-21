@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <!-- Apache Error Pages | AGPL License | https://github.com/justinhartman/Apache-Error-Pages -->
     <meta charset="utf-8">
@@ -10,6 +11,7 @@
     <link rel="stylesheet" href="../style/main.css">
     <link rel="stylesheet" href="../style/breakpoints.css">
 </head>
+
 <body>
     <div id="container">
         <!-- 
@@ -34,34 +36,37 @@
         var charIndex = -1;
         var stringLength = 0;
         var inputText;
-        function writeContent()
-        {
+        function writeContent() {
             inputText = document.getElementById('errormsg').innerHTML;
             if (charIndex === -1) {
                 charIndex = 0;
                 stringLength = inputText.length;
             }
             var initString = document.getElementById('echoerror').innerHTML;
-            initString = initString.replace(/<span.*$/gi,"");
+            initString = initString.replace(/<span.*$/gi, "");
 
             var theChar = inputText.charAt(charIndex);
-            var nextFourChars = inputText.substr(charIndex,4);
+            var nextFourChars = inputText.substr(charIndex, 4);
 
             if (nextFourChars === '<br>') {
                 theChar = '<br>';
-                charIndex+=3;
+                charIndex += 3;
             }
 
             initString = initString + theChar + "<span id='blink'>▌</span>";
             document.getElementById('echoerror').innerHTML = initString;
 
             time = 35;
-            charIndex = charIndex/1 +1;
+            charIndex = charIndex / 1 + 1;
             if (charIndex <= stringLength) {
-                setTimeout('writeContent(false)',time);
+                setTimeout('writeContent(false)', time);
             }
         }
         writeContent();
     </script>
+    <div class="error__nav e-nav">
+        <a href="../index.html" class="e-nav__link"></a>
+    </div>
 </body>
+
 </html>
