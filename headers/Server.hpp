@@ -12,10 +12,11 @@ public :
 	const char*			_port;
 	const char*			_host;
 
-	Server(server_block &server) : _server(server),
+	Server(server_block &server) : _server_name(server.server_name.c_str()),
+								 _server(server),
 								 _port(server.port.c_str()),
-								 _host(server.host.c_str()),
-								 _server_name(server.server_name.c_str()){
+								 _host(server.host.c_str())
+								{
 	}
 	void	create_socket();
 };

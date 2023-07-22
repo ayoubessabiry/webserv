@@ -15,8 +15,19 @@ int	main(int ac, char **av)
 	}
 	file.open(av[1]);
 
+	if (!file.is_open())
+	{
+		std::cout << "File not found " << std::endl;
+		return 0;
+	}
+
 	file_data << file.rdbuf();
 
+	if (file_data.eof())
+	{
+		std::cout << "File is empty " << std::endl;
+		return 0;
+	}
 	file_data_string = file_data.str();
 
 	web_s.parse_server_block(file_data_string);
@@ -24,8 +35,8 @@ int	main(int ac, char **av)
 
 	if (!web_s.parse_state)
 		return 0;
-	for(int i = 0; i < web_s.server_blocks.size(); ++i){
-		Server s(web_s.server_blocks[i]);//web_s.server_blocks[i].port.c_str(), web_s.server_blocks[i].host.c_str(), web_s.server_blocks[i].server_name);
+	for(size_t i = 0; i < web_s.server_blocks.size(); ++i){
+		Server s(web_s.server_blocks[i]);
 		websrv.add_server(s);
 	}
 	websrv.start_listening();

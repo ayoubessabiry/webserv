@@ -2,13 +2,13 @@
 
 void	Init::read_socket(int ready_client){
 	int i = -1;
-	while(++i < server.size()){
+	while(++i < (int)server.size()){
 		if (ready_client == server[i]._socket){
 			add_client(ready_client);
 			break ;
 		}
 	}
-	if (i == server.size())
+	if (i == (int)server.size())
 		get_rqst(ready_client);
 }
 
@@ -65,7 +65,7 @@ void	Init::get_rqst(int ready_client){
 	int				i = 0;
 	int				recB = 0;
 
-	while (i < clients.size() && ready_client != clients[i].socket)
+	while (i < (int)clients.size() && ready_client != clients[i].socket)
 		++i;
 	memset(&clients[i].buffer, 0, MAX_REQUEST_SIZE);
 	recB = recv(ready_client, &clients[i].buffer, MAX_REQUEST_SIZE, 0);
@@ -74,10 +74,9 @@ void	Init::get_rqst(int ready_client){
 	if(send_request(clients[i], buff)){
 		// move ready_client to send();
 		std::string host = clients[i].rqst.headers["Host"];
-		size_t size = host.size();
 		size_t find_dot = host.find(":");
 		std::string port = host.substr(find_dot + 1, host.size());
-		for (int j = 0 ; j < server.size(); j++)
+		for (size_t j = 0 ; j < server.size(); j++)
 		{
 			if (server[j]._server.port == port)
 			{
@@ -93,7 +92,7 @@ void	Init::get_rqst(int ready_client){
 
 void	Init::send_response(int ready_client){
 	int i =0;
-	while(i < clients.size() && ready_client != clients[i].socket)
+	while(i < (int)clients.size() && ready_client != clients[i].socket)
 		++i;
 
 	clients[i].desired_location = clients[i].match_location();
@@ -267,7 +266,7 @@ void	Init::start_listening(){
 		timeval timeout = {10, 0}; // waiting for 10sec
 		int		read_client;
 		int		write_client;
-		int		i;
+		// int		i;
 
 		read = masterRead;
 		write = masterWrite;

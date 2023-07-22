@@ -16,17 +16,16 @@ location_block Client::match_location()
 {
     int     location_index = 0;
     int     matching_size = 0, max_matching_size = -1;
-    bool    match_none = false;
 
     if (rqst.uri == "/")
         return configuration.locations[location_index];
-    for (int i = 0; i < configuration.locations.size(); i++)
+    for (size_t i = 0; i < configuration.locations.size(); i++)
     {
         if (configuration.locations[i].prefix == "/")
             i++;
         if (i >= configuration.locations.size())
             break ;
-        for (int j = 1; j < configuration.locations[i].prefix.size()
+        for (size_t j = 1; j < configuration.locations[i].prefix.size()
             && rqst.uri[j] == configuration.locations[i].prefix[j]
             && rqst.uri >= configuration.locations[i].prefix ; j++)
         {

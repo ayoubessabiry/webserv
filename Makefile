@@ -35,7 +35,7 @@ CC= c++
 
 #-Wall -Wextra -Werror
 
-CPPFLAGS= -std=c++98
+CPPFLAGS= -std=c++98 -Wall -Wextra -Werror
 
 NAME = webserv
 

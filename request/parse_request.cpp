@@ -66,7 +66,7 @@ int	convert_hex_to_decimal(std::string hex_number)
 std::string url_encoding(std::string uri)
 {
     std::string url = "";
-    for (int i = 0 ; i < uri.size(); i++)
+    for (int i = 0 ; i < (int)uri.size(); i++)
     {
         
         if (uri[i] == ' ' || uri[i] == '!' 
@@ -131,7 +131,7 @@ bool request::body_chunked_encoding(std::string &req)
 				b_size += chunk_saver.size();
 				chunk_saver += req;
 			}
-			if (chunk_saver.size() >= chunk_size)
+			if ((int)chunk_saver.size() >= chunk_size)
 			{
 				std::string chunk = chunk_saver;
 				chunk_part = chunk.substr(chunk_size + 2, chunk_saver.size());

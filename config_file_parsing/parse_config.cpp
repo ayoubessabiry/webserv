@@ -74,12 +74,18 @@ int	get_port(std::vector<std::string> config_tokens)
 
 void webserver::parse_server_block(std::string config_file_data)
 {
+	if (config_file_data.empty())
+	{
+		parse_state = false;
+		return ;
+	}
 	size_t	block_state = 0;
-	size_t	bracket_state = 0;
 	size_t	port_directive_numbers = 0;
 	size_t	host_directive_numbers = 0;
 	size_t	location_block_numbers = 0;
 	size_t	root_directive_numbers = 0;
+
+	bool	state_changed = false;
 
 	server_block	server;
 	location_block	location;
@@ -134,6 +140,7 @@ void webserver::parse_server_block(std::string config_file_data)
 		}
 		if (block_state == SERVER)
 		{
+			state_changed = true;
 			if (config_tokens[i] == "}")
 			{
 				block_state = 0;
@@ -408,9 +415,9 @@ void webserver::parse_server_block(std::string config_file_data)
 			}
 		}
 	}
-	for (int i = 0 ; i < server_blocks.size(); i++)
+	for (size_t i = 0 ; i < server_blocks.size(); i++)
 	{
-		for (int j = i + 1 ; j < server_blocks.size(); j++)
+		for (size_t j = i + 1 ; j < server_blocks.size(); j++)
 		{
 			if (server_blocks[i].port == server_blocks[j].port)
 			{
@@ -419,6 +426,11 @@ void webserver::parse_server_block(std::string config_file_data)
 				return ;
 			}
 		}
+	}
+	if (!state_changed)
+	{
+		parse_state = false;
+		return ;
 	}
 }
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Init.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: smounir <smounir@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 10:17:07 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/17 10:43:19 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/22 11:31:20 by smounir          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ public:
 		max_Wsocket = 0;
 	}
 	void	add_server(Server& s){
-		for (int i = 0; i < server.size(); ++i){
+		for (size_t i = 0; i < server.size(); ++i){
 			if (server[i]._host == s._host && server[i]._port == s._port)
 				return ;
 		}
