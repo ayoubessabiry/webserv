@@ -252,7 +252,6 @@ bool	send_request(Client& client, std::string& buff)
 
 	if (ended)
 	{
-		client.rqst.print_request();
 		client.is_reading_body = false;
 		client.request_collector = "";
 	}

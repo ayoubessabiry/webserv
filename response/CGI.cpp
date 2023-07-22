@@ -6,7 +6,7 @@
 /*   By: aessabir <aessabir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:37:15 by aessabir          #+#    #+#             */
-/*   Updated: 2023/07/21 16:56:53 by aessabir         ###   ########.fr       */
+/*   Updated: 2023/07/22 12:32:41 by aessabir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,18 +106,6 @@ bool	CGI::send_cgi_response(Client& client){
 	std::string  status_msg;
 	char		r[MAX_REQUEST_SIZE];
 
-	if (status == 502){
-		if (client.rqst.method == "GET"){
-			client.get.setStatusCode(status);
-			client.get.setFileNameToFileError();
-			cgi_response_file = client.get.getFileName();
-		}
-		else if (client.rqst.method == "POST"){
-			client.post.setStatusCode(status);
-			client.post.setFileNameToFileError();
-			cgi_response_file = client.post.getFileName();
-		}
-	}
 	file.open(cgi_file_name, std::ios_base::in | std::ios_base::out);
 	file.seekg(client.bytes_sent);
 	file.read(r, MAX_REQUEST_SIZE);

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>WebServer</title>
+    <link rel="stylesheet" type="text/css" href="../style/502.css" />
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="box">
+            <h1>502</h1>
+            <p>Bad Gateway</p>
+        </div>
+    </div>
+    <div class="error__nav e-nav">
+        <a href="../index.html" class="e-nav__link"></a>
+    </div>
+</body>
+
+</html>
