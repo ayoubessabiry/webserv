@@ -168,7 +168,14 @@ void webserver::parse_server_block(std::string config_file_data)
 			{
 				i++;
 				port_directive_numbers++;
-				if (config_tokens[i].size() > 4)
+				if (config_tokens[i].size() > 5 || 
+					(config_tokens[i].size() == 5 && 
+					config_tokens[i][0] == '6' &&
+					config_tokens[i][1] == '5' &&
+					config_tokens[i][2] == '5' &&
+					config_tokens[i][3] == '3' &&
+					config_tokens[i][4] > '5'
+					))
 				{
 					std::cout << "Error: Port is invalid !!" << std::endl;
 					parse_state = false;
@@ -185,6 +192,12 @@ void webserver::parse_server_block(std::string config_file_data)
 				if (config_tokens[i] != ";")
 				{
 					std::cout << "ERRORtt\n";
+					return ;
+				}
+				if (port_directive_numbers > 1)
+				{
+					std::cout << "Error: Only one port per server !!" << std::endl;
+					parse_state = false;
 					return ;
 				}
 				if (!check_if_port_valid(config_tokens[i]) && config_tokens[i] != ";")
@@ -204,6 +217,12 @@ void webserver::parse_server_block(std::string config_file_data)
 					!check_if_host_valid(host))
 				{
 					std::cout << "Error: Host is invalid" << std::endl;
+					parse_state = false;
+					return ;
+				}				
+				if (host_directive_numbers > 1)
+				{
+					std::cout << "Error: Only one host per server !!" << std::endl;
 					parse_state = false;
 					return ;
 				}
@@ -386,6 +405,18 @@ void webserver::parse_server_block(std::string config_file_data)
 				location.root.clear();
 				location.redirect.clear();
 				root_directive_numbers = 0;
+			}
+		}
+	}
+	for (int i = 0 ; i < server_blocks.size(); i++)
+	{
+		for (int j = i + 1 ; j < server_blocks.size(); j++)
+		{
+			if (server_blocks[i].port == server_blocks[j].port)
+			{
+				std::cout << "Error: port aleady setuped " << std::endl;
+				parse_state = false;
+				return ;
 			}
 		}
 	}
