@@ -18,9 +18,8 @@ Webserv is a custom HTTP server implementation that adheres to the HTTP 1.1 prot
 
 ## Requirements
 
-- C++ Compiler (C++11 or later)
-- MacOS (for specific instructions, see section III.2)
-- [Test Environment](https://link-to-test-environment.com) (optional but recommended)
+- C++ Compiler
+- MacOS 
 
 ## Usage
 
@@ -54,9 +53,8 @@ Please refer to the provided sample configuration files for more details.
 
 - Fully static website serving.
 - GET, POST, and DELETE methods.
-- Non-blocking I/O using poll() or equivalent.
+- Non-blocking I/O using select().
 - Support for multiple ports and hosts.
-- Stress-tested for high availability.
 - Default error pages.
 - Ability to accept uploaded files from clients.
 
@@ -88,7 +86,7 @@ In this example, we've defined two CGI extensions, `.py` and `.php`, along with 
 
 If you do not specify custom configurations for a particular CGI extension, Webserv will use the following default configurations:
 
-- For `.py` files, the server will execute them using the `/usr/bin/python3` binary.
+- For `.py` files, the server will execute them using the `/usr/bin/python-cgi` binary.
 - For `.php` files, the server will execute them using the `/usr/bin/php-cgi` binary.
 
 ## Using CGI in Routes
